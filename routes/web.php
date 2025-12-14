@@ -8,6 +8,7 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\SantriController;
 use App\Http\Controllers\NilaiController;
 use App\Http\Controllers\RekapController;
+use App\Http\Controllers\PublicRapotController;
 use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
@@ -17,6 +18,10 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Public access: cek nilai santri tanpa login
+Route::get('/cek-nilai', [PublicRapotController::class, 'showForm'])->name('public.cek_nilai');
+Route::post('/cek-nilai', [PublicRapotController::class, 'check'])->name('public.cek_nilai.check');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
