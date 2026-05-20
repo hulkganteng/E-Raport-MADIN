@@ -46,7 +46,7 @@
             <p class="text-sm text-slate-500 font-medium">Periode Aktif</p>
             <h3 class="text-lg font-bold text-slate-800">{{ $periodeAktif->nama_periode ?? 'Belum Ada' }}</h3>
              @if($periodeAktif)
-            <p class="text-xs text-orange-600 font-semibold">{{ \Carbon\Carbon::parse($periodeAktif->start_date)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($periodeAktif->end_date)->format('d M Y') }}</p>
+            <p class="text-xs text-orange-600 font-semibold">{{ \Carbon\Carbon::parse($periodeAktif->start_date)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($periodeAktif->end_date)->translatedFormat('d M Y') }}</p>
              @endif
         </div>
     </div>
@@ -61,9 +61,9 @@
             <h4 class="font-bold text-sm text-slate-700 mb-2">Panduan Cepat:</h4>
             <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
                 <li>Pastikan Data Master (Mapel, Kelas, Santri) sudah lengkap.</li>
-                <li>Atur jadwal/mapel per kelas di menu <strong>Kelas Ruang</strong>.</li>
-                <li>Input nilai harian dan ujian di menu <strong>Akademik > Input Nilai</strong>.</li>
-                <li>Cetak rapot di menu <strong>Akademik > Rekap & Rapot</strong>.</li>
+                <li>Atur jadwal/mapel per kelas di menu <strong>Data Kelas</strong>.</li>
+                <li>Input nilai harian dan ujian di menu <strong>Akademik &gt; Input Nilai</strong>.</li>
+                <li>Cetak rapot lewat menu <strong>Data Kelas &gt; Rekap Nilai</strong>.</li>
             </ul>
         </div>
     </div>
@@ -71,8 +71,8 @@
     <!-- Simple Calendar / Date Widget -->
     <div class="bg-gradient-to-br from-teal-500 to-teal-700 rounded-2xl shadow-lg p-8 text-white flex flex-col justify-between">
         <div>
-            <h2 class="text-3xl font-bold">{{ date('l') }}</h2>
-            <p class="text-teal-100 text-lg">{{ date('d F Y') }}</p>
+            <h2 class="text-3xl font-bold">{{ \Carbon\Carbon::now()->translatedFormat('l') }}</h2>
+            <p class="text-teal-100 text-lg">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
         </div>
         <div class="mt-8">
             <p class="text-sm text-teal-200 uppercase tracking-widest font-bold">Waktu Sekarang</p>

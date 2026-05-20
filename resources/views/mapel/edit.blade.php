@@ -7,26 +7,36 @@
     <form action="{{ route('mapel.update', $mapel) }}" method="POST" class="space-y-6">
         @csrf
         @method('PUT')
+        @if($errors->any())
+            <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div>
             <label class="block text-sm font-medium text-slate-700">Nama Mata Pelajaran</label>
-            <input type="text" name="nama_mapel" value="{{ $mapel->nama_mapel }}" required class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+            <input type="text" name="nama_mapel" value="{{ old('nama_mapel', $mapel->nama_mapel) }}" required class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
         </div>
 
         <div class="grid grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Kategori</label>
                 <select name="kategori" class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
-                    <option value="umum" {{ $mapel->kategori == 'umum' ? 'selected' : '' }}>Umum</option>
-                    <option value="khusus" {{ $mapel->kategori == 'khusus' ? 'selected' : '' }}>Khusus</option>
-                    <option value="cabang" {{ $mapel->kategori == 'cabang' ? 'selected' : '' }}>Cabang</option>
+                    <option value="umum" {{ old('kategori', $mapel->kategori) == 'umum' ? 'selected' : '' }}>Umum</option>
+                    <option value="khusus" {{ old('kategori', $mapel->kategori) == 'khusus' ? 'selected' : '' }}>Khusus</option>
+                    <option value="cabang" {{ old('kategori', $mapel->kategori) == 'cabang' ? 'selected' : '' }}>Cabang</option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-slate-700">Tingkatan</label>
                 <select name="tingkatan" class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
-                    <option value="all" {{ $mapel->tingkatan == 'all' ? 'selected' : '' }}>Semua</option>
-                    <option value="ula" {{ $mapel->tingkatan == 'ula' ? 'selected' : '' }}>Ula</option>
-                    <option value="wustho" {{ $mapel->tingkatan == 'wustho' ? 'selected' : '' }}>Wustho</option>
+                    <option value="all" {{ old('tingkatan', $mapel->tingkatan) == 'all' ? 'selected' : '' }}>Semua</option>
+                    <option value="ula" {{ old('tingkatan', $mapel->tingkatan) == 'ula' ? 'selected' : '' }}>Ula</option>
+                    <option value="wustho" {{ old('tingkatan', $mapel->tingkatan) == 'wustho' ? 'selected' : '' }}>Wustho</option>
                 </select>
             </div>
         </div>
@@ -34,11 +44,11 @@
         <div class="grid grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Bobot Harian (%)</label>
-                <input type="number" name="bobot_harian" value="{{ $mapel->bobot_harian }}" min="0" max="100" class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                <input type="number" name="bobot_harian" value="{{ old('bobot_harian', $mapel->bobot_harian) }}" min="0" max="100" class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
             </div>
             <div>
                 <label class="block text-sm font-medium text-slate-700">Bobot Ujian (%)</label>
-                <input type="number" name="bobot_ujian" value="{{ $mapel->bobot_ujian }}" min="0" max="100" class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                <input type="number" name="bobot_ujian" value="{{ old('bobot_ujian', $mapel->bobot_ujian) }}" min="0" max="100" class="mt-1 block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
             </div>
         </div>
 

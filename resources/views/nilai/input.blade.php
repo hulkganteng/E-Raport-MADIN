@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@push('head')
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+@endpush
+
 @section('header', 'Input Nilai: ' . $kelasMapel->mapel->nama_mapel)
 
 @section('content')
@@ -14,6 +20,16 @@
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <form action="{{ route('nilai.store', $kelasMapel->id) }}" method="POST">
         @csrf
+        
+        @if($errors->any())
+            <div class="p-4 bg-red-50 border-b border-red-200 text-red-700 text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
@@ -39,20 +55,28 @@
                         <td class="px-6 py-4">
                             <input type="number" step="0.01" min="0" max="100" 
                                 name="nilai[{{ $santri->id }}][harian]" 
-                                value="{{ $grade ? $grade->nilai_harian : '' }}" 
-                                class="w-full text-center rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500" placeholder="0">
+                                value="{{ old('nilai.' . $santri->id . '.harian', $grade ? $grade->nilai_harian : '') }}" 
+                                class="w-full text-center rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 nilai-input" 
+                                data-view="desktop"
+                                data-santri-id="{{ $santri->id }}" 
+                                data-type="harian"
+                                placeholder="0">
                         </td>
                         <td class="px-6 py-4">
                             <input type="number" step="0.01" min="0" max="100" 
                                 name="nilai[{{ $santri->id }}][ujian]" 
-                                value="{{ $grade ? $grade->nilai_ujian : '' }}" 
-                                class="w-full text-center rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500" placeholder="0">
+                                value="{{ old('nilai.' . $santri->id . '.ujian', $grade ? $grade->nilai_ujian : '') }}" 
+                                class="w-full text-center rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 nilai-input" 
+                                data-view="desktop"
+                                data-santri-id="{{ $santri->id }}" 
+                                data-type="ujian"
+                                placeholder="0">
                         </td>
                         <td class="px-6 py-4 text-center font-bold text-slate-700">
-                            {{ $grade ? number_format($grade->nilai_akhir, 2) : '-' }}
+                            {{ $grade && $grade->nilai_akhir !== null ? number_format($grade->nilai_akhir, 2) : '-' }}
                         </td>
                         <td class="px-6 py-4 text-center">
-                            @if($grade)
+                            @if($grade && $grade->predikat)
                                 <span class="px-2 py-1 rounded text-xs font-bold {{ $grade->predikat == 'A' ? 'bg-green-100 text-green-700' : ($grade->predikat == 'D' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700') }}">
                                     {{ $grade->predikat }}
                                 </span>
@@ -89,11 +113,14 @@
                         <label class="block text-xs font-medium text-slate-600 mb-1">
                             Nilai Harian ({{ $kelasMapel->mapel->bobot_harian }}%)
                         </label>
-                        <input type="number" step="0.01" min="0" max="100" 
-                            name="nilai[{{ $santri->id }}][harian]" 
-                            value="{{ $grade ? $grade->nilai_harian : '' }}" 
-                            class="w-full text-center text-lg rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500" 
-                            placeholder="0">
+                            <input type="number" step="0.01" min="0" max="100" 
+                                name="nilai[{{ $santri->id }}][harian]" 
+                                value="{{ old('nilai.' . $santri->id . '.harian', $grade ? $grade->nilai_harian : '') }}" 
+                                class="w-full text-center text-lg rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 nilai-input" 
+                                data-view="mobile"
+                                data-santri-id="{{ $santri->id }}" 
+                                data-type="harian"
+                                placeholder="0">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">
@@ -101,17 +128,20 @@
                         </label>
                         <input type="number" step="0.01" min="0" max="100" 
                             name="nilai[{{ $santri->id }}][ujian]" 
-                            value="{{ $grade ? $grade->nilai_ujian : '' }}" 
-                            class="w-full text-center text-lg rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500" 
+                            value="{{ old('nilai.' . $santri->id . '.ujian', $grade ? $grade->nilai_ujian : '') }}" 
+                            class="w-full text-center text-lg rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 nilai-input" 
+                            data-view="mobile"
+                            data-santri-id="{{ $santri->id }}" 
+                            data-type="ujian"
                             placeholder="0">
                     </div>
                 </div>
                 
-                @if($grade)
-                <div class="flex justify-between items-center text-sm bg-slate-50 rounded-lg p-3">
-                    <span class="text-slate-600 font-medium">Nilai Akhir:</span>
-                    <span class="text-lg font-bold text-teal-700">{{ number_format($grade->nilai_akhir, 2) }}</span>
-                </div>
+                @if($grade && $grade->nilai_akhir !== null)
+                    <div class="flex justify-between items-center text-sm bg-slate-50 rounded-lg p-3">
+                        <span class="text-slate-600 font-medium">Nilai Akhir:</span>
+                        <span class="text-lg font-bold text-teal-700">{{ number_format($grade->nilai_akhir, 2) }}</span>
+                    </div>
                 @endif
             </div>
             @endforeach
@@ -124,4 +154,49 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    // 1. Sinkronisasi input antara tampilan Desktop dan Mobile
+    // Menggunakan data attributes untuk mencocokkan input yang sama
+    const allInputs = document.querySelectorAll('.nilai-input');
+
+    function syncDisabledState() {
+        const activeView = window.matchMedia('(min-width: 768px)').matches ? 'desktop' : 'mobile';
+        allInputs.forEach(input => {
+            input.disabled = input.dataset.view !== activeView;
+        });
+    }
+
+    syncDisabledState();
+    window.addEventListener('resize', syncDisabledState);
+    
+    allInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const santriId = this.getAttribute('data-santri-id');
+            const type = this.getAttribute('data-type');
+            const value = this.value;
+            
+            // Cari input pasangannya (desktop/mobile view)
+            const matchingInputs = document.querySelectorAll(`.nilai-input[data-santri-id="${santriId}"][data-type="${type}"]`);
+            
+            matchingInputs.forEach(matchInput => {
+                if (matchInput !== this) {
+                    matchInput.value = value;
+                }
+            });
+        });
+    });
+    
+    // 2. Tambahkan loading state pada tombol submit
+    form.addEventListener('submit', function(e) {
+        syncDisabledState();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
+    });
+});
+</script>
 @endsection

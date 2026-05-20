@@ -3,6 +3,10 @@
 @section('header', 'Data Santri')
 
 @section('content')
+@php
+    $canManageSantri = auth()->user()->role === 'super_admin';
+@endphp
+
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-4 sm:p-6 border-b border-slate-200 flex flex-col gap-4">
         <h3 class="text-lg font-bold text-slate-800">Direktori Santri</h3>
@@ -17,11 +21,13 @@
                 </select>
             </form>
             
-            <a href="{{ route('santri.create') }}" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm font-semibold shadow-md shadow-teal-500/30 flex items-center justify-center gap-2 whitespace-nowrap">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                <span class="hidden sm:inline">Tambah Santri</span>
-                <span class="sm:hidden">Tambah</span>
-            </a>
+            @if($canManageSantri)
+                <a href="{{ route('santri.create') }}" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm font-semibold shadow-md shadow-teal-500/30 flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span class="hidden sm:inline">Tambah Santri</span>
+                    <span class="sm:hidden">Tambah</span>
+                </a>
+            @endif
         </div>
     </div>
     
@@ -34,7 +40,9 @@
                     <th class="px-6 py-4">Nama Lengkap</th>
                     <th class="px-6 py-4">Kelas</th>
                     <th class="px-6 py-4">Status</th>
-                    <th class="px-6 py-4 text-center">Aksi</th>
+                    @if($canManageSantri)
+                        <th class="px-6 py-4 text-center">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -48,25 +56,27 @@
                             {{ ucfirst($santri->status) }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="flex justify-center gap-2">
-                            <a href="{{ route('santri.edit', $santri) }}" class="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            </a>
-                            <form action="{{ route('santri.destroy', $santri) }}" method="POST" onsubmit="return confirm('Yakin hapus santri ini?');" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
+                    @if($canManageSantri)
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center gap-2">
+                                <a href="{{ route('santri.edit', $santri) }}" class="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </a>
+                                <form action="{{ route('santri.destroy', $santri) }}" method="POST" onsubmit="return confirm('Yakin hapus santri ini?');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    @endif
                 </tr>
                 @endforeach
                 @if($santris->isEmpty())
                 <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada data santri.</td>
+                    <td colspan="{{ $canManageSantri ? 5 : 4 }}" class="px-6 py-8 text-center text-slate-400">Belum ada data santri.</td>
                 </tr>
                 @endif
             </tbody>
@@ -89,18 +99,20 @@
             <div class="mb-3">
                 <p class="text-sm text-slate-600"><span class="font-medium">Kelas:</span> {{ $santri->kelas->nama_kelas ?? '-' }}</p>
             </div>
-            <div class="flex gap-2">
-                <a href="{{ route('santri.edit', $santri) }}" class="flex-1 px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition text-sm font-medium text-center">
-                    Edit
-                </a>
-                <form action="{{ route('santri.destroy', $santri) }}" method="POST" onsubmit="return confirm('Yakin hapus santri ini?');" class="flex-1">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="w-full px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium">
-                        Hapus
-                    </button>
-                </form>
-            </div>
+            @if($canManageSantri)
+                <div class="flex gap-2">
+                    <a href="{{ route('santri.edit', $santri) }}" class="flex-1 px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition text-sm font-medium text-center">
+                        Edit
+                    </a>
+                    <form action="{{ route('santri.destroy', $santri) }}" method="POST" onsubmit="return confirm('Yakin hapus santri ini?');" class="flex-1">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+            @endif
         </div>
         @endforeach
         @if($santris->isEmpty())

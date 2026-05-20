@@ -6,7 +6,17 @@
 <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
     <form action="{{ route('santri.store') }}" method="POST">
         @csrf
-        
+
+        @if($errors->any())
+            <div class="p-4 mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Left Column: Academic Info -->
             <div class="space-y-6">

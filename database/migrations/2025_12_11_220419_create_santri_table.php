@@ -16,6 +16,14 @@ return new class extends Migration
             $table->string('nis')->unique();
             $table->string('nama_lengkap');
             $table->foreignId('kelas_id')->constrained('kelas');
+            $table->string('tempat_lahir')->nullable();
+            $table->date('tanggal_lahir')->nullable();
+            $table->text('alamat')->nullable();
+            $table->string('nama_ayah')->nullable();
+            $table->string('pekerjaan_ayah')->nullable();
+            $table->string('nama_ibu')->nullable();
+            $table->string('pekerjaan_ibu')->nullable();
+            $table->string('no_hp_ortu')->nullable();
             $table->string('status')->default('aktif');
             $table->timestamps();
         });

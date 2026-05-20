@@ -104,11 +104,15 @@
 </div>
 
 <script>
-    document.getElementById('checkAll').addEventListener('change', function() {
-        var checkboxes = document.querySelectorAll('.mapel-check');
-        for (var checkbox of checkboxes) {
-            checkbox.checked = this.checked;
-        }
-    });
+    const checkAll = document.getElementById('checkAll');
+
+    if (checkAll) {
+        checkAll.addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('.mapel-check');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+    }
 </script>
 @endsection

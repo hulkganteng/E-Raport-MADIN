@@ -23,24 +23,33 @@ class KenaikanKelasController extends Controller
     public function show(Kelas $kelas)
     {
         $santriList = $kelas->santri()->where('status', 'aktif')->get();
-        $targetKelasList = Kelas::where('id', '!=', $kelas->id)->get();
-        
-        // Determine graduation eligibility
-        $canGraduate = false;
-        if (($kelas->tingkatan == 'ula' && $kelas->tingkat == 3) || 
-            ($kelas->tingkatan == 'wustho' && $kelas->tingkat == 6)) {
-            $canGraduate = true;
-        }
+        $isUlaFinal = $kelas->tingkatan === 'ula' && (int) $kelas->tingkat === 3;
+        $isWusthoFinal = $kelas->tingkatan === 'wustho' && (int) $kelas->tingkat === 6;
+        $canGraduate = $isUlaFinal || $isWusthoFinal;
+        $canContinueToWustho = $isUlaFinal;
 
-        return view('kenaikan.show', compact('kelas', 'santriList', 'targetKelasList', 'canGraduate'));
+        $targetKelasList = $canContinueToWustho
+            ? Kelas::where('tingkatan', 'wustho')->get()
+            : Kelas::where('id', '!=', $kelas->id)->get();
+
+        return view('kenaikan.show', compact(
+            'kelas',
+            'santriList',
+            'targetKelasList',
+            'canGraduate',
+            'canContinueToWustho',
+            'isUlaFinal',
+            'isWusthoFinal'
+        ));
     }
 
     public function process(Request $request, Kelas $kelas)
     {
         $request->validate([
-            'santri_ids' => 'required|array',
-            'action' => 'required|in:promote,graduate,retain',
-            'target_kelas_id' => 'required_if:action,promote|exists:kelas,id',
+            'santri_ids' => 'required|array|min:1',
+            'santri_ids.*' => 'integer|distinct|exists:santri,id',
+            'action' => 'required|in:promote,graduate,graduate_continue,retain',
+            'target_kelas_id' => 'nullable|required_if:action,promote,graduate_continue|exists:kelas,id',
         ]);
 
         $activePeriode = Periode::where('is_active', true)->first();
@@ -54,35 +63,76 @@ class KenaikanKelasController extends Controller
             return back()->with('error', 'Kenaikan kelas hanya dapat dilakukan pada semester Genap.');
         }
 
-        DB::transaction(function () use ($request, $kelas, $activePeriode) {
+        $isUlaFinal = $kelas->tingkatan === 'ula' && (int) $kelas->tingkat === 3;
+        $isWusthoFinal = $kelas->tingkatan === 'wustho' && (int) $kelas->tingkat === 6;
+        $selectedSantriIds = collect($request->input('santri_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+        $validSantriCount = Santri::where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->whereIn('id', $selectedSantriIds)
+            ->count();
+
+        if ($validSantriCount !== $selectedSantriIds->count()) {
+            return back()->with('error', 'Santri yang dipilih harus santri aktif pada kelas ini.')->withInput();
+        }
+
+        if (in_array($request->action, ['promote', 'graduate_continue'], true)
+            && (int) $request->target_kelas_id === (int) $kelas->id) {
+            return back()->with('error', 'Target kelas baru tidak boleh sama dengan kelas asal.')->withInput();
+        }
+
+        if ($request->action === 'graduate_continue' && !$isUlaFinal) {
+            return back()->with('error', 'Lulus dan lanjut ke Wustho hanya berlaku untuk kelas akhir Ula.');
+        }
+
+        if ($request->action === 'graduate' && !$isUlaFinal && !$isWusthoFinal) {
+            return back()->with('error', 'Kelulusan hanya berlaku untuk kelas 3 Ula atau 6 Wustho.');
+        }
+
+        if ($request->action === 'promote' && $isUlaFinal) {
+            return back()->with('error', 'Untuk kelas 3 Ula, gunakan aksi Lulus Ula & Lanjut Wustho.');
+        }
+
+        if ($request->action === 'graduate_continue') {
+            $targetKelas = Kelas::find($request->target_kelas_id);
+
+            if (!$targetKelas || $targetKelas->tingkatan !== 'wustho') {
+                return back()->with('error', 'Target lanjutan kelas 3 Ula harus kelas Wustho.');
+            }
+        }
+
+        DB::transaction(function () use ($request, $kelas, $activePeriode, $isUlaFinal) {
             $santriIds = $request->santri_ids;
             $action = $request->action;
             
             foreach ($santriIds as $santriId) {
-                $santri = Santri::find($santriId);
+                $santri = Santri::where('kelas_id', $kelas->id)->find($santriId);
                 if (!$santri) continue;
 
-                // 1. Record history
+                $historyStatus = match ($action) {
+                    'promote' => 'naik_kelas',
+                    'graduate_continue' => 'lulus_ula_lanjut_wustho',
+                    'graduate' => $isUlaFinal ? 'lulus_ula' : 'lulus',
+                    default => 'tinggal_kelas',
+                };
+
                 RiwayatKelas::create([
                     'santri_id' => $santri->id,
                     'kelas_id' => $kelas->id,
                     'periode_id' => $activePeriode->id,
-                    'status' => $action === 'promote' ? 'naik_kelas' : ($action === 'graduate' ? 'lulus' : 'tinggal_kelas'),
+                    'status' => $historyStatus,
                 ]);
 
-                // 2. Perform Action
-                if ($action === 'promote') {
+                if ($action === 'promote' || $action === 'graduate_continue') {
                     $santri->kelas_id = $request->target_kelas_id;
+                    $santri->status = 'aktif';
                     $santri->save();
                 } elseif ($action === 'graduate') {
                     $santri->status = 'lulus';
-                    // Optional: remove from kelas_id or keep last class? Usually keep last class for record.
-                    // But if we want to remove from class list, set null?
-                    // User requirement: "Fitur Kelulusan". Let's assume keeping details but status 'lulus' excludes from active queries.
                     $santri->save();
-                } 
-                // If retain, do nothing to santri table (stays in same class), just recorded in history as 'tinggal_kelas'?
-                // Or maybe 'tinggal_kelas' means they repeat? If they repeat, they just stay.
+                }
             }
         });
 

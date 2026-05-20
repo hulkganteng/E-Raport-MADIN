@@ -31,7 +31,7 @@ class PublicRapotController extends Controller
             ])->withInput();
         }
 
-        $santri = Santri::with(['kelas', 'biodata'])
+        $santri = Santri::with('kelas')
             ->where('nis', $data['nis'])
             ->whereRaw('LOWER(nama_lengkap) = ?', [strtolower($data['nama_lengkap'])])
             ->first();
@@ -55,6 +55,10 @@ class PublicRapotController extends Controller
         $nilaiMapel = NilaiMapel::with(['kelasMapel.mapel'])
             ->where('santri_id', $santri->id)
             ->where('periode_id', $periode->id)
+            ->whereHas('kelasMapel', function ($q) use ($santri, $periode) {
+                $q->where('kelas_id', $santri->kelas_id)
+                    ->where('periode_id', $periode->id);
+            })
             ->get();
 
         $totalSantri = RekapNilai::where('periode_id', $periode->id)

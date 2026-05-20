@@ -24,12 +24,16 @@ class PeriodeController extends Controller
         $request->validate([
             'nama_periode' => 'required|string|max:255',
             'semester' => 'required|in:ganjil,genap',
+            'nama_kepala_madrasah' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'is_active' => 'boolean'
         ]);
 
         DB::transaction(function () use ($request) {
+            // Lock all rows to prevent race condition
+            Periode::lockForUpdate()->get();
+
             if ($request->has('is_active') && $request->is_active) {
                 // Deactivate all others
                 Periode::where('is_active', true)->update(['is_active' => false]);
@@ -42,6 +46,7 @@ class PeriodeController extends Controller
             Periode::create([
                 'nama_periode' => $request->nama_periode,
                 'semester' => $request->semester,
+                'nama_kepala_madrasah' => $request->nama_kepala_madrasah,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'is_active' => $isActive
@@ -61,12 +66,16 @@ class PeriodeController extends Controller
         $request->validate([
             'nama_periode' => 'required|string|max:255',
             'semester' => 'required|in:ganjil,genap',
+            'nama_kepala_madrasah' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'is_active' => 'boolean'
         ]);
 
         DB::transaction(function () use ($request, $periode) {
+            // Lock all rows to prevent race condition
+            Periode::lockForUpdate()->get();
+
             if ($request->has('is_active') && $request->is_active) {
                  // Deactivate all others
                  Periode::where('id', '!=', $periode->id)->update(['is_active' => false]);
@@ -75,6 +84,7 @@ class PeriodeController extends Controller
             $periode->update([
                 'nama_periode' => $request->nama_periode,
                 'semester' => $request->semester,
+                'nama_kepala_madrasah' => $request->nama_kepala_madrasah,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'is_active' => $request->is_active ?? $periode->is_active
@@ -86,16 +96,20 @@ class PeriodeController extends Controller
 
     public function destroy(Periode $periode)
     {
-        if ($periode->is_active) {
-            return back()->with('error', 'Tidak bisa menghapus periode yang sedang aktif. Aktifkan periode lain terlebih dahulu.');
+        if (! $periode->is_active) {
+            return back()->with('success', 'Periode sudah nonaktif dan data tetap tersimpan.');
         }
-        $periode->delete();
-        return redirect()->route('periode.index')->with('success', 'Periode berhasil dihapus');
+
+        $periode->update(['is_active' => false]);
+
+        return redirect()->route('periode.index')->with('success', 'Periode berhasil dinonaktifkan. Data periode tetap tersimpan.');
     }
     
     public function activate(Periode $periode)
     {
         DB::transaction(function () use ($periode) {
+            // Lock all rows to prevent race condition
+            Periode::lockForUpdate()->get();
             Periode::where('id', '!=', $periode->id)->update(['is_active' => false]);
             $periode->update(['is_active' => true]);
         });

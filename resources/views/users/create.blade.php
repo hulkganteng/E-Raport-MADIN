@@ -27,7 +27,6 @@
             <select name="role" required class="block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm @error('role') border-red-500 @enderror">
                 <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru Mapel</option>
                 <option value="wali_kelas" {{ old('role') == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
-                <option value="kepsek" {{ old('role') == 'kepsek' ? 'selected' : '' }}>Kepala Sekolah</option>
                 <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Staff Admin (Super Admin)</option>
             </select>
             @error('role')
@@ -64,7 +63,6 @@
             <a href="{{ route('users.index') }}" class="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition font-semibold">Batal</a>
             <button type="submit" class="px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-semibold shadow-lg shadow-teal-500/30">Simpan User</button>
         </div>
-    </form>
     </form>
 </div>
 <script>

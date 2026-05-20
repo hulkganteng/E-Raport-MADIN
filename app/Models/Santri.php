@@ -14,11 +14,6 @@ class Santri extends Model
         return $this->belongsTo(Kelas::class);
     }
 
-    public function biodata()
-    {
-        return $this->hasOne(SantriBiodata::class);
-    }
-    
     public function nilai_mapel()
     {
         return $this->hasMany(NilaiMapel::class);

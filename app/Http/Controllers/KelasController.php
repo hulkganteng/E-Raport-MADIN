@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Mapel;
 use App\Models\KelasMapel;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 use App\Models\Periode;
 use App\Models\WaliKelas;
@@ -26,23 +27,27 @@ class KelasController extends Controller
                                 ->pluck('kelas_id');
         }
 
-        // Logic display:
-        // 1. Super Admin / Admin / Kepsek/Staff -> Lihat Semua
-        // 2. Wali Kelas (Role explicit OR Assigned dynamic) -> Lihat Assigned Only
         
         $isAdmin = in_array($user->role, ['super_admin', 'admin', 'kepsek', 'staff']); // Adjust roles as needed
 
-        if (!$isAdmin && ($user->role == 'wali_kelas' || $assignedKelasIds->isNotEmpty())) {
-            if ($activePeriode) {
-                $kelas = Kelas::whereIn('id', $assignedKelasIds)
-                            ->with(['current_wali_kelas.user', 'kelas_mapel'])
-                            ->get();
-            } else {
-                $kelas = collect(); 
-            }
+        if ($isAdmin) {
+            $kelas = Kelas::with([
+                'current_wali_kelas.user',
+                'kelas_mapel' => function ($query) use ($activePeriode) {
+                    if ($activePeriode) {
+                        $query->where('periode_id', $activePeriode->id);
+                    }
+                },
+            ])->get();
+        } elseif ($activePeriode && $assignedKelasIds->isNotEmpty()) {
+            $kelas = Kelas::whereIn('id', $assignedKelasIds)
+                        ->with([
+                            'current_wali_kelas.user',
+                            'kelas_mapel' => fn ($query) => $query->where('periode_id', $activePeriode->id),
+                        ])
+                        ->get();
         } else {
-            // Admin sees all
-            $kelas = Kelas::with(['current_wali_kelas.user', 'kelas_mapel'])->get();
+            $kelas = collect();
         }
 
         return view('kelas.index', compact('kelas'));
@@ -51,38 +56,80 @@ class KelasController extends Controller
     public function create()
     {
         $wali_kelas = User::where('role', 'wali_kelas')->get();
-        return view('kelas.create', compact('wali_kelas'));
+        $activePeriode = Periode::where('is_active', true)->first();
+
+        return view('kelas.create', compact('wali_kelas', 'activePeriode'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_kelas' => 'required',
-            'tingkatan' => 'required|in:ula,wustho',
-            'tahun_ajar' => 'required',
-        ]);
+        $activePeriode = Periode::where('is_active', true)->first();
+        if (!$activePeriode) {
+            return back()->with('error', 'Tidak ada periode aktif. Silahkan aktifkan Tahun Ajaran terlebih dahulu.')->withInput();
+        }
 
-        Kelas::create($request->all());
+        $request->validate([
+            'nama_kelas' => 'required|string|max:50',
+            'tingkat' => 'required|integer|min:1|max:6',
+            'wali_kelas_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where('role', 'wali_kelas'),
+            ],
+        ]);
+        $tingkat = (int) $request->tingkat;
+
+        Kelas::create([
+            'nama_kelas' => $request->nama_kelas,
+            'tingkat' => $tingkat,
+            'tingkatan' => $this->resolveTingkatan($tingkat),
+            'tahun_ajar' => $activePeriode->nama_periode,
+            'wali_kelas_id' => $request->wali_kelas_id,
+        ]);
 
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil ditambahkan');
     }
 
     public function edit(Kelas $kelas)
     {
-        return view('kelas.edit', compact('kelas'));
+        $wali_kelas = User::where('role', 'wali_kelas')->get();
+        $activePeriode = Periode::where('is_active', true)->first();
+
+        return view('kelas.edit', compact('kelas', 'wali_kelas', 'activePeriode'));
     }
 
     public function update(Request $request, Kelas $kelas)
     {
+        $activePeriode = Periode::where('is_active', true)->first();
+        if (!$activePeriode) {
+            return back()->with('error', 'Tidak ada periode aktif. Silahkan aktifkan Tahun Ajaran terlebih dahulu.')->withInput();
+        }
+
         $request->validate([
-            'nama_kelas' => 'required',
-            'tingkatan' => 'required|in:ula,wustho',
-            'tahun_ajar' => 'required',
+            'nama_kelas' => 'required|string|max:50',
+            'tingkat' => 'required|integer|min:1|max:6',
+            'wali_kelas_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where('role', 'wali_kelas'),
+            ],
+        ]);
+        $tingkat = (int) $request->tingkat;
+
+        $kelas->update([
+            'nama_kelas' => $request->nama_kelas,
+            'tingkat' => $tingkat,
+            'tingkatan' => $this->resolveTingkatan($tingkat),
+            'tahun_ajar' => $activePeriode->nama_periode,
+            'wali_kelas_id' => $request->wali_kelas_id,
         ]);
 
-        $kelas->update($request->all());
-
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil diupdate');
+    }
+
+    private function resolveTingkatan(int $tingkat): string
+    {
+        return $tingkat <= 3 ? 'ula' : 'wustho';
     }
 
     public function manageWali()
@@ -136,7 +183,11 @@ class KelasController extends Controller
         }
 
         $request->validate([
-            'user_id' => 'nullable|exists:users,id'
+            'user_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where(fn ($query) => $query->whereIn('role', ['guru', 'wali_kelas'])),
+            ],
         ]);
 
         $userId = $request->input('user_id');
@@ -166,10 +217,10 @@ class KelasController extends Controller
         return redirect()->route('kelas.manage_wali')->with('success', 'Wali Kelas berhasil diperbarui untuk ' . $kelas->nama_kelas);
     }
 
-    // Deprecated bulk update kept for compatibility if needed, but UI will change
+    // Deprecated bulk update — redirect to manage page
     public function updateWali(Request $request)
     {
-        return $this->updateWaliSingle($request, Kelas::first()); // Placeholder, logic moved to single
+        return redirect()->route('kelas.manage_wali')->with('error', 'Gunakan halaman assign wali per kelas.');
     }
     
     public function manageMapel(Kelas $kelas)
@@ -201,15 +252,63 @@ class KelasController extends Controller
         }
 
         $request->validate([
-            'mapel_ids' => 'array',
-            'meta' => 'array',
+            'mapel_ids' => 'nullable|array',
+            'mapel_ids.*' => 'integer|distinct|exists:mapel,id',
+            'meta' => 'nullable|array',
         ]);
         
-        $mapel_ids = $request->input('mapel_ids', []); // Array of checked mapel IDs
+        $mapel_ids = collect($request->input('mapel_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
         $meta = $request->input('meta', []); // meta[mapel_id][guru_id] etc
+        $availableMapelIds = Mapel::whereIn('tingkatan', [$kelas->tingkatan, 'all'])
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $validGuruIds = User::where('role', 'guru')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $errors = [];
+        $assignments = [];
+
+        foreach ($mapel_ids as $mapel_id) {
+            if (!in_array($mapel_id, $availableMapelIds, true)) {
+                $errors["mapel_ids.$mapel_id"] = 'Mata pelajaran yang dipilih tidak sesuai tingkatan kelas ini.';
+                continue;
+            }
+
+            $guru_id = $meta[$mapel_id]['guru_id'] ?? null;
+            $kkm = $meta[$mapel_id]['kkm'] ?? null;
+
+            if ($guru_id === null || $guru_id === '') {
+                $errors["meta.$mapel_id.guru_id"] = 'Guru pengampu wajib dipilih untuk setiap mapel yang dicentang.';
+            } elseif (!in_array((int) $guru_id, $validGuruIds, true)) {
+                $errors["meta.$mapel_id.guru_id"] = 'Guru pengampu tidak valid atau bukan user dengan role guru.';
+            }
+
+            if ($kkm === null || $kkm === '') {
+                $errors["meta.$mapel_id.kkm"] = 'KKM wajib diisi untuk setiap mapel yang dicentang.';
+            } elseif (!is_numeric($kkm) || (float) $kkm < 0 || (float) $kkm > 100) {
+                $errors["meta.$mapel_id.kkm"] = 'KKM harus berupa angka 0-100.';
+            }
+
+            if (!isset($errors["meta.$mapel_id.guru_id"]) && !isset($errors["meta.$mapel_id.kkm"])) {
+                $assignments[$mapel_id] = [
+                    'guru_id' => (int) $guru_id,
+                    'kkm' => (float) $kkm,
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            return back()->withErrors($errors)->withInput();
+        }
         
         // Use Transaction
-        \DB::transaction(function() use ($kelas, $activePeriode, $mapel_ids, $meta) {
+        \DB::transaction(function() use ($kelas, $activePeriode, $mapel_ids, $assignments) {
             // 1. Remove assignments for this period that are NOT in the checked list
             // This handles "unchecking" a subject
             KelasMapel::where('kelas_id', $kelas->id)
@@ -219,8 +318,7 @@ class KelasController extends Controller
 
             // 2. Update or Create for checked ones
             foreach($mapel_ids as $mapel_id) {
-                $guru_id = $meta[$mapel_id]['guru_id'] ?? null;
-                $kkm = $meta[$mapel_id]['kkm'] ?? 65; // Default KKM
+                $assignment = $assignments[$mapel_id];
 
                 KelasMapel::updateOrCreate(
                     [
@@ -229,8 +327,8 @@ class KelasController extends Controller
                         'periode_id' => $activePeriode->id
                     ],
                     [
-                        'guru_id' => $guru_id,
-                        'kkm' => $kkm
+                        'guru_id' => $assignment['guru_id'],
+                        'kkm' => $assignment['kkm'],
                     ]
                 );
             }

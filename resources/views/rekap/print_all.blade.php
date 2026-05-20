@@ -4,6 +4,18 @@
     <meta charset="utf-8">
     <title>Rapot Kelas {{ $kelas->nama_kelas }}</title>
     <style>
+        @font-face {
+            font-family: 'ArabicNaskh';
+            font-style: normal;
+            font-weight: 400;
+            src: url('file:///{{ str_replace("\\", "/", resource_path("fonts/arabtype.ttf")) }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'ArabicNaskh';
+            font-style: normal;
+            font-weight: 700;
+            src: url('file:///{{ str_replace("\\", "/", resource_path("fonts/tradbdo.ttf")) }}') format('truetype');
+        }
         @page {
             size: A4;
             margin: 1cm;
@@ -69,15 +81,31 @@
             vertical-align: top;
             padding-left: 30px;
         }
+        .report-page {
+            page-break-inside: avoid;
+        }
+        .split-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px 0;
+            margin-bottom: 10px;
+        }
+        .split-table td {
+            vertical-align: top;
+            padding: 0;
+        }
+        .panel-left, .panel-right {
+            width: 50%;
+        }
         table.nilai {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 10pt;
+            margin-bottom: 0;
+            font-size: 9pt;
         }
         table.nilai th, table.nilai td {
-            border: 1px solid #000;
-            padding: 4px 6px;
+            border: 1px solid #111;
+            padding: 2px 4px;
             vertical-align: middle;
         }
         table.nilai th {
@@ -92,29 +120,61 @@
         }
         table.nilai .arabic {
             text-align: center;
-            font-size: 9pt;
+            font-size: 12pt;
+            font-family: 'ArabicNaskh', 'Traditional Arabic', serif;
+            line-height: 1.15;
+        }
+        table.nilai .arabic-words {
+            font-size: 10pt;
+            line-height: 1.05;
+        }
+        .arabic-inline {
+            font-family: 'ArabicNaskh', 'Traditional Arabic', serif;
+            display: inline-block;
+            font-size: 12pt;
+            line-height: 1.15;
+        }
+        .arabic-right {
+            text-align: right;
         }
         .kepribadian {
-            margin-top: 10px;
-            font-size: 10pt;
+            margin-top: 0;
+            font-size: 9pt;
         }
         .kepribadian table {
             width: 100%;
             border-collapse: collapse;
         }
         .kepribadian th, .kepribadian td {
-            border: 1px solid #000;
-            padding: 4px 6px;
+            border: 1px solid #111;
+            padding: 2px 4px;
+        }
+        .arabic-head {
+            font-family: 'ArabicNaskh', 'Traditional Arabic', serif;
+            font-size: 13pt;
+            font-weight: bold;
+            padding-top: 3px;
         }
         .catatan {
-            margin-top: 10px;
+            margin-top: 12px;
             border: 1px solid #000;
-            padding: 10px;
-            min-height: 50px;
+            padding: 0;
+            min-height: 68px;
             font-size: 10pt;
         }
+        .catatan-title {
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding: 2px 0;
+        }
+        .catatan-body {
+            text-align: center;
+            font-style: italic;
+            padding: 8px 10px 20px;
+        }
         .signature {
-            margin-top: 30px;
+            margin-top: 10px;
             font-size: 10pt;
         }
         .signature table {
@@ -126,7 +186,7 @@
             padding: 5px;
         }
         .signature .name {
-            margin-top: 60px;
+            margin-top: 58px;
             font-weight: bold;
             text-decoration: underline;
         }
@@ -136,35 +196,6 @@
     </style>
 </head>
 <body>
-    @php
-        function convertToArabicNumber($number) {
-            $western = ['0','1','2','3','4','5','6','7','8','9'];
-            $eastern = ['Uÿ','U­','U›','Uœ','U','U','UÝ','U','U"','Uc'];
-            return str_replace($western, $eastern, $number);
-        }
-
-        function convertPredikatToArabic($predikat) {
-            $map = ['A' => 'Oœ', 'B' => 'O"', 'C' => 'Oª', 'D' => 'O_', 'E' => 'UØU?'];
-            return $map[$predikat] ?? $predikat;
-        }
-
-        function getArabicSubjectName($name) {
-            $map = [
-                'AKHLAK' => 'OU,OœOrU,OU,',
-                'HADITS' => 'OU,O-O_USO®',
-                'FIQIH' => 'OU,U?U,UØ',
-                'TAUHID' => 'OU,O¦U^O-USO_',
-                'TARIKH' => 'OU,O¦OOñUSOr',
-                'NAHWU' => 'OU,U+O-U^',
-                'SHOROF' => 'OU,OæOñU?',
-                'BAHASA ARAB' => 'OU,U,O§Oc OU,O1OñO"USOc',
-                'FAROIDH' => 'OU,U?OñOOÝO',
-                'BMK' => 'O¦O1U,USU. U,OñOOc OU,UŸO¦OO"',
-            ];
-            return $map[strtoupper($name)] ?? '-';
-        }
-    @endphp
-
     @for($copy = 1; $copy <= ($copies ?? 1); $copy++)
         @foreach($data as $item)
             @php
@@ -174,206 +205,15 @@
                 $nilaiMapel = $item['nilaiMapel'];
                 $totalSantri = $item['totalSantri'];
             @endphp
-
-            <!-- Header -->
-            <div class="header">
-                <img src="{{ public_path('logo.jpg') }}" alt="Logo" class="logo">
-                <div class="header-text">
-                    <h3>MADRASAH DINIYAH</h3>
-                    <h3>PONDOK PESANTREN ASSYAFI'IYAH</h3>
-                    <p>321235250108</p>
-                    <p>JL. NONGKO KEREP RT 02 RW 01, BUNGAH, BUNGAH, GRESIK, JAWA TIMUR, 61152</p>
-                    <p>Email: assyafiyahbungahgresik@gmail.com</p>
-                </div>
-            </div>
-
-            <!-- Title -->
-            <div class="title">LAPORAN HASIL BELAJAR SANTRI</div>
-
-            <!-- Student Info -->
-            <div class="student-info">
-                <table>
-                    <tr>
-                        <td class="left">
-                            <table style="width: 100%;">
-                                <tr>
-                                    <td style="width: 30%;">Nama Santri</td>
-                                    <td style="width: 5%;">:</td>
-                                    <td style="width: 65%; font-weight: bold;">{{ strtoupper($santri->nama_lengkap) }}</td>
-                                </tr>
-                                <tr>
-                                    <td>No. Induk</td>
-                                    <td>:</td>
-                                    <td>{{ $santri->nis }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Alamat</td>
-                                    <td>:</td>
-                                    <td>{{ $santri->biodata->alamat ?? '-' }}</td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td class="right">
-                            <table style="width: 100%;">
-                                <tr>
-                                    <td style="width: 35%;">Kelas</td>
-                                    <td style="width: 5%;">:</td>
-                                    <td style="width: 60%;">{{ $santri->kelas->tingkatan }} ({{ $santri->kelas->nama_kelas }})</td>
-                                </tr>
-                                <tr>
-                                    <td>Semester</td>
-                                    <td>:</td>
-                                    <td>{{ $periode->nama_periode }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Tahun Pelajaran</td>
-                                    <td>:</td>
-                                    <td>{{ $santri->kelas->tahun_ajar }}</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Nilai Table -->
-            <table class="nilai">
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="width: 30px;">No</th>
-                        <th rowspan="2" style="width: 180px;">Mata Pelajaran</th>
-                        <th colspan="2">Hasil Tes</th>
-                        <th colspan="2" class="arabic">OU,O_OñOªOO¦ OU,O1U,U.USOc</th>
-                        <th rowspan="2" class="arabic" style="width: 120px;">OU,U.U^OO_ OU,O_OñOO3USOc</th>
-                    </tr>
-                    <tr>
-                        <th style="width: 50px;">Angka</th>
-                        <th style="width: 50px;">Huruf</th>
-                        <th class="arabic" style="width: 50px;">OñU,U.</th>
-                        <th class="arabic" style="width: 50px;">OrOú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                     @php
-                        $no = 1;
-                        $totalNilai = 0;
-                        $nilaiUmum = $nilaiMapel->filter(function($n) { return $n->kelasMapel->mapel->kategori == 'umum'; });
-                        $nilaiKhusus = $nilaiMapel->filter(function($n) { return $n->kelasMapel->mapel->kategori == 'khusus'; });
-                        $nilaiCabang = $nilaiMapel->filter(function($n) { return $n->kelasMapel->mapel->kategori == 'cabang'; });
-                    @endphp
-                    
-                    <!-- UMUM -->
-                    <tr><td class="category" colspan="7">A - UMUM (OU,O1OU.)</td></tr>
-                    @foreach($nilaiUmum as $nilai)
-                    <tr>
-                        <td class="text-center">{{ $no++ }}</td>
-                        <td>{{ strtoupper($nilai->kelasMapel->mapel->nama_mapel) }}</td>
-                        <td class="text-center">{{ round($nilai->nilai_akhir) }}</td>
-                        <td class="text-center">{{ $nilai->predikat }}</td>
-                        <td class="text-center arabic">{{ convertToArabicNumber(round($nilai->nilai_akhir)) }}</td>
-                        <td class="text-center arabic">{{ convertPredikatToArabic($nilai->predikat) }}</td>
-                        <td class="text-center arabic">{{ getArabicSubjectName($nilai->kelasMapel->mapel->nama_mapel) }}</td>
-                    </tr>
-                    @php $totalNilai += $nilai->nilai_akhir; @endphp
-                    @endforeach
-
-                     <!-- KHUSUS -->
-                    <tr><td class="category" colspan="7">B - KHUSUS (OU,OrOOæ)</td></tr>
-                    @foreach($nilaiKhusus as $nilai)
-                    <tr>
-                        <td class="text-center">{{ $no++ }}</td>
-                        <td>{{ strtoupper($nilai->kelasMapel->mapel->nama_mapel) }}</td>
-                        <td class="text-center">{{ round($nilai->nilai_akhir) }}</td>
-                        <td class="text-center">{{ $nilai->predikat }}</td>
-                        <td class="text-center arabic">{{ convertToArabicNumber(round($nilai->nilai_akhir)) }}</td>
-                        <td class="text-center arabic">{{ convertPredikatToArabic($nilai->predikat) }}</td>
-                        <td class="text-center arabic">{{ getArabicSubjectName($nilai->kelasMapel->mapel->nama_mapel) }}</td>
-                    </tr>
-                     @php $totalNilai += $nilai->nilai_akhir; @endphp
-                    @endforeach
-
-                      <!-- CABANG -->
-                    <tr><td class="category" colspan="7">C - CABANG (OU,U?OñO1)</td></tr>
-                    @foreach($nilaiCabang as $nilai)
-                    <tr>
-                        <td class="text-center">{{ $no++ }}</td>
-                        <td>{{ strtoupper($nilai->kelasMapel->mapel->nama_mapel) }}</td>
-                        <td class="text-center">{{ round($nilai->nilai_akhir) }}</td>
-                        <td class="text-center">{{ $nilai->predikat }}</td>
-                        <td class="text-center arabic">{{ convertToArabicNumber(round($nilai->nilai_akhir)) }}</td>
-                        <td class="text-center arabic">{{ convertPredikatToArabic($nilai->predikat) }}</td>
-                        <td class="text-center arabic">{{ getArabicSubjectName($nilai->kelasMapel->mapel->nama_mapel) }}</td>
-                    </tr>
-                     @php $totalNilai += $nilai->nilai_akhir; @endphp
-                    @endforeach
-                    
-                     <!-- Summary -->
-                    <tr>
-                        <td colspan="2" class="fw-bold text-center">JUMLAH (OU,OªU.U,Oc)</td>
-                        <td class="text-center fw-bold">{{ round($totalNilai) }}</td>
-                        <td></td>
-                        <td class="text-center arabic fw-bold">{{ convertToArabicNumber(round($totalNilai)) }}</td>
-                        <td colspan="2"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="fw-bold text-center">RANGKING (OU,O_OñOªOc)</td>
-                        <td class="text-center fw-bold">{{ $rekap->ranking ?? '-' }}</td>
-                        <td colspan="4" class="text-center">Dari {{ $totalSantri ?? 0 }} Santri</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Kepribadian & Absensi -->
-            <!-- Similar to single print but adapted handling -->
-            <div class="kepribadian">
-                <table>
-                    <tr>
-                        <th style="width: 50%;">KEPRIBADIAN (O¦O-U,USU, OU,OúOU,O")</th>
-                        <th style="width: 50%;">Absensi (UŸO'U? OU,O§USOO")</th>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align: top;">
-                            <table style="width: 100%; border: none;">
-                                <tr><td style="border:none">Akhlaq</td><td style="border:none">:</td><td style="border:none" class="fw-bold">{{ $rekap->akhlaq ?? 'A' }}</td><td style="border:none" class="arabic text-right">OœOrU,OU,</td></tr>
-                                <tr><td style="border:none">Kerajinan</td><td style="border:none">:</td><td style="border:none" class="fw-bold">{{ $rekap->kerajinan ?? 'A' }}</td><td style="border:none" class="arabic text-right">OªO_USOc</td></tr>
-                                <tr><td style="border:none">Kedisiplinan</td><td style="border:none">:</td><td style="border:none" class="fw-bold">{{ $rekap->kedisiplinan ?? 'A' }}</td><td style="border:none" class="arabic text-right">OU+OO"OOú</td></tr>
-                                <tr><td style="border:none">Kerapihan</td><td style="border:none">:</td><td style="border:none" class="fw-bold">{{ $rekap->kerapihan ?? 'A' }}</td><td style="border:none" class="arabic text-right">U+O,OU?Oc</td></tr>
-                            </table>
-                        </td>
-                        <td style="vertical-align: top;">
-                             <table style="width: 100%; border: none;">
-                                <tr><td style="border:none">Sakit</td><td style="border:none">:</td><td style="border:none">{{ $absensi->sakit ?? 0 }}</td><td style="border:none" class="arabic text-right">O"O1OøOñ</td></tr>
-                                <tr><td style="border:none">Izin</td><td style="border:none">:</td><td style="border:none">{{ $absensi->izin ?? 0 }}</td><td style="border:none" class="arabic text-right">O"O1OøOñ OæO-US</td></tr>
-                                <tr><td style="border:none">Alpa</td><td style="border:none">:</td><td style="border:none">{{ $absensi->alpha ?? 0 }}</td><td style="border:none" class="arabic text-right">O"O_U^U+ O1OøOñ</td></tr>
-                                <tr><td style="border:none">Jumlah</td><td style="border:none">:</td><td style="border:none" class="fw-bold">{{ ($absensi->sakit??0) + ($absensi->izin??0) + ($absensi->alpha??0) }}</td><td style="border:none" class="arabic text-right">OU,OªU.U,Oc</td></tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="catatan">
-                <strong>CATATAN GURU</strong><br>
-                <em>Tetap semangat | Kana seterossu bakurunnya</em>
-            </div>
-
-            <div class="signature">
-                 <div class="text-right" style="margin-bottom: 5px;">
-                    GRESIK, {{ strtoupper(\Carbon\Carbon::now()->translatedFormat('d F Y')) }}
-                </div>
-                <table>
-                    <tr>
-                        <td style="width: 33%;">Orang Tua/Wali</td>
-                        <td style="width: 34%;">Guru Wali Kelas</td>
-                        <td style="width: 33%;">Kepala Madrasah</td>
-                    </tr>
-                    <tr>
-                        <td><br><br><br><br><div class="name">...................................</div></td>
-                        <td><br><br><br><br><div class="name">{{ strtoupper($santri->kelas->waliKelas->name ?? '-') }}</div></td>
-                        <td><br><br><br><br><div class="name">M. SHOLAHUDDIN MALIKI, S.Pd.I</div></td>
-                    </tr>
-                </table>
-            </div>
+            @include('rekap.partials.report_page', [
+                'santri' => $santri,
+                'periode' => $periode,
+                'rekap' => $rekap,
+                'absensi' => $absensi,
+                'nilaiMapel' => $nilaiMapel,
+                'totalSantri' => $totalSantri,
+                'logoSrc' => $logoSrc ?? null,
+            ])
 
             @if(!($loop->last && $copy === ($copies ?? 1)))
             <div class="page-break"></div>

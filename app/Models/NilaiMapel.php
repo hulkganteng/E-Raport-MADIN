@@ -14,11 +14,18 @@ class NilaiMapel extends Model
         return $this->belongsTo(Santri::class);
     }
 
+    // Alias snake_case untuk kompatibilitas kode lama
     public function kelas_mapel()
     {
-        return $this->belongsTo(KelasMapel::class);
+        return $this->kelasMapel();
     }
     
+    // Relasi dengan nama camelCase supaya eager load kelasMapel.* tidak error
+    public function kelasMapel()
+    {
+        return $this->belongsTo(KelasMapel::class, 'kelas_mapel_id');
+    }
+
     public function mapel()
     {
         return $this->hasOneThrough(Mapel::class, KelasMapel::class, 'id', 'id', 'kelas_mapel_id', 'mapel_id');

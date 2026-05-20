@@ -20,7 +20,7 @@ class MapelController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'nama_mapel' => 'required',
             'kategori' => 'required|in:umum,khusus,cabang',
             'tingkatan' => 'required|in:ula,wustho,all',
@@ -28,7 +28,11 @@ class MapelController extends Controller
             'bobot_ujian' => 'required|integer|min:0|max:100',
         ]);
 
-        Mapel::create($request->all());
+        if ((int) $data['bobot_harian'] + (int) $data['bobot_ujian'] !== 100) {
+            return back()->withErrors(['bobot_harian' => 'Total bobot harian dan ujian harus 100%.'])->withInput();
+        }
+
+        Mapel::create($data);
 
         return redirect()->route('mapel.index')->with('success', 'Mata Pelajaran berhasil ditambahkan');
     }
@@ -40,7 +44,7 @@ class MapelController extends Controller
 
     public function update(Request $request, Mapel $mapel)
     {
-         $request->validate([
+         $data = $request->validate([
             'nama_mapel' => 'required',
             'kategori' => 'required|in:umum,khusus,cabang',
             'tingkatan' => 'required|in:ula,wustho,all',
@@ -48,7 +52,11 @@ class MapelController extends Controller
             'bobot_ujian' => 'required|integer|min:0|max:100',
         ]);
 
-        $mapel->update($request->all());
+        if ((int) $data['bobot_harian'] + (int) $data['bobot_ujian'] !== 100) {
+            return back()->withErrors(['bobot_harian' => 'Total bobot harian dan ujian harus 100%.'])->withInput();
+        }
+
+        $mapel->update($data);
 
         return redirect()->route('mapel.index')->with('success', 'Mata Pelajaran berhasil diupdate');
     }

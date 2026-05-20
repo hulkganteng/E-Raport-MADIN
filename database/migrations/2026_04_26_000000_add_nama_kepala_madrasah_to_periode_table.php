@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Biodata santri now lives directly on the santri table.
+        Schema::table('periode', function (Blueprint $table) {
+            $table->string('nama_kepala_madrasah')->nullable()->after('semester');
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('santri_biodata');
+        Schema::table('periode', function (Blueprint $table) {
+            $table->dropColumn('nama_kepala_madrasah');
+        });
     }
 };

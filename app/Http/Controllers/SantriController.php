@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Santri;
 use App\Models\Kelas;
-use App\Models\SantriBiodata;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,14 +25,15 @@ class SantriController extends Controller
 
     public function show(Santri $santri)
     {
-        $santri->load('biodata', 'kelas');
+        $santri->load('kelas');
+        $kelas = Kelas::all();
         // Since we don't have a show view yet, maybe redirect to edit or rekap?
         // Let's redirect to edit if admin, or maybe just return a simple view or json?
         // User didn't ask for specialized show, but let's provide basic or rekap
         // Actually, let's redirect to rekap? Or just return the model
         // For debugging, let's just return view('santri.edit') generally readonly?
         // Let's keep it simple:
-        return view('santri.edit', compact('santri'));
+        return view('santri.edit', compact('santri', 'kelas'));
         // Or if edit is blocked for non-admin, this might be issue.
     }
 
@@ -47,16 +47,19 @@ class SantriController extends Controller
     {
         $request->validate([
             // Main Data
-            'nis' => 'required|unique:santri,nis',
-            'nama_lengkap' => 'required',
+            'nis' => 'required|string|max:50|unique:santri,nis',
+            'nama_lengkap' => 'required|string|max:120',
             'kelas_id' => 'required|exists:kelas,id',
             
             // Biodata
-            'tempat_lahir' => 'required',
+            'tempat_lahir' => 'required|string|max:100',
             'tanggal_lahir' => 'required|date',
-            'alamat' => 'required',
-            'nama_ayah' => 'required',
-            'nama_ibu' => 'required',
+            'alamat' => 'required|string|max:1000',
+            'nama_ayah' => 'required|string|max:120',
+            'pekerjaan_ayah' => 'nullable|string|max:120',
+            'nama_ibu' => 'required|string|max:120',
+            'pekerjaan_ibu' => 'nullable|string|max:120',
+            'no_hp_ortu' => 'nullable|string|max:30',
         ]);
 
         try {
@@ -66,11 +69,6 @@ class SantriController extends Controller
                 'nis' => $request->nis,
                 'nama_lengkap' => $request->nama_lengkap,
                 'kelas_id' => $request->kelas_id,
-                'status' => 'aktif',
-            ]);
-
-            SantriBiodata::create([
-                'santri_id' => $santri->id,
                 'tempat_lahir' => $request->tempat_lahir,
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'alamat' => $request->alamat,
@@ -79,6 +77,7 @@ class SantriController extends Controller
                 'nama_ibu' => $request->nama_ibu,
                 'pekerjaan_ibu' => $request->pekerjaan_ibu,
                 'no_hp_ortu' => $request->no_hp_ortu,
+                'status' => 'aktif',
             ]);
 
             DB::commit();
@@ -92,7 +91,6 @@ class SantriController extends Controller
 
     public function edit(Santri $santri)
     {
-        $santri->load('biodata');
         $kelas = Kelas::all();
         return view('santri.edit', compact('santri', 'kelas'));
     }
@@ -101,15 +99,19 @@ class SantriController extends Controller
     {
         $request->validate([
              // Main Data
-            'nis' => 'required|unique:santri,nis,' . $santri->id,
-            'nama_lengkap' => 'required',
+            'nis' => 'required|string|max:50|unique:santri,nis,' . $santri->id,
+            'nama_lengkap' => 'required|string|max:120',
             'kelas_id' => 'required|exists:kelas,id',
+            'status' => 'required|in:aktif,lulus,pindah',
              // Biodata
-            'tempat_lahir' => 'required',
+            'tempat_lahir' => 'required|string|max:100',
             'tanggal_lahir' => 'required|date',
-             'alamat' => 'required',
-            'nama_ayah' => 'required',
-            'nama_ibu' => 'required',
+            'alamat' => 'required|string|max:1000',
+            'nama_ayah' => 'required|string|max:120',
+            'pekerjaan_ayah' => 'nullable|string|max:120',
+            'nama_ibu' => 'required|string|max:120',
+            'pekerjaan_ibu' => 'nullable|string|max:120',
+            'no_hp_ortu' => 'nullable|string|max:30',
         ]);
 
         try {
@@ -119,22 +121,16 @@ class SantriController extends Controller
                 'nis' => $request->nis,
                 'nama_lengkap' => $request->nama_lengkap,
                 'kelas_id' => $request->kelas_id,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'alamat' => $request->alamat,
+                'nama_ayah' => $request->nama_ayah,
+                'pekerjaan_ayah' => $request->pekerjaan_ayah,
+                'nama_ibu' => $request->nama_ibu,
+                'pekerjaan_ibu' => $request->pekerjaan_ibu,
+                'no_hp_ortu' => $request->no_hp_ortu,
                 'status' => $request->status ?? 'aktif',
             ]);
-
-            $santri->biodata()->updateOrCreate(
-                ['santri_id' => $santri->id],
-                [
-                    'tempat_lahir' => $request->tempat_lahir,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'alamat' => $request->alamat,
-                    'nama_ayah' => $request->nama_ayah,
-                    'pekerjaan_ayah' => $request->pekerjaan_ayah,
-                    'nama_ibu' => $request->nama_ibu,
-                    'pekerjaan_ibu' => $request->pekerjaan_ibu,
-                    'no_hp_ortu' => $request->no_hp_ortu,
-                ]
-            );
 
             DB::commit();
             return redirect()->route('santri.index')->with('success', 'Data Santri berhasil diupdate');

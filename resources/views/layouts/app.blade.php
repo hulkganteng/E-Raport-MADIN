@@ -10,16 +10,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+
+        #sidebar {
+            transform: translateX(-100%);
+        }
+
+        #sidebar-toggle:checked ~ #sidebar,
+        #sidebar.is-open {
+            transform: translateX(0);
+        }
+
+        #sidebar-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #sidebar-toggle:checked ~ #sidebar-overlay,
+        #sidebar-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        body:has(#sidebar-toggle:checked),
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            #sidebar {
+                transform: translateX(0);
+            }
+        }
     </style>
+    @stack('head')
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
     <div class="min-h-screen flex relative">
+        <input id="sidebar-toggle" type="checkbox" class="sr-only" aria-hidden="true">
         
         <!-- Mobile Sidebar Overlay -->
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none md:hidden transition-opacity duration-300"></div>
+        <label id="sidebar-overlay" for="sidebar-toggle" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none md:hidden transition-opacity duration-300" aria-label="Tutup menu"></label>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-teal-900 text-white shadow-2xl h-screen fixed top-0 left-0 z-50 transform -translate-x-full md:translate-x-0 md:sticky transition-transform duration-300 ease-in-out flex flex-col">
+        <aside id="sidebar" class="w-64 bg-teal-900 text-white shadow-2xl h-screen fixed top-0 left-0 z-50 md:sticky transition-transform duration-300 ease-in-out flex flex-col">
             <!-- Sidebar Header -->
             <div class="p-6 border-b border-teal-800 flex items-center justify-between gap-3">
                  <div class="flex items-center gap-3 min-w-0">
@@ -42,9 +75,9 @@
                     </div>
                  </div>
                  <!-- Close button mobile -->
-                 <button id="sidebar-close-btn" class="md:hidden text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition">
+                 <label id="sidebar-close-btn" for="sidebar-toggle" role="button" tabindex="0" class="md:hidden text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer" aria-label="Tutup menu">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                 </button>
+                 </label>
             </div>
             
             <nav class="flex-1 overflow-y-auto py-4">
@@ -68,7 +101,7 @@
                     <li>
                         <a href="{{ route('kelas.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('kelas.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                            Kelas Ruang
+                            Data Kelas
                         </a>
                     </li>
                     <li>
@@ -83,12 +116,14 @@
                             Data Santri
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('kenaikan.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('kenaikan.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                            Kenaikan & Kelulusan
-                        </a>
-                    </li>
+                    @if(isset($globalActivePeriode) && $globalActivePeriode->semester === 'genap')
+                        <li>
+                            <a href="{{ route('kenaikan.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('kenaikan.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                Kenaikan & Kelulusan
+                            </a>
+                        </li>
+                    @endif
                     <li>
                         <a href="{{ route('periode.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('periode.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -118,22 +153,31 @@
                     }
                 @endphp
 
-                @if($isWaliKelas)
+                @if($isWaliKelas && auth()->user()->role !== 'super_admin')
                 <li>
-                    <a href="{{ route('kelas.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('rekap.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
+                    <a href="{{ route('kelas.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('rekap.*') || request()->routeIs('kelas.index') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Laporan Rapot
                     </a>
                 </li>
                 @endif
+
+                {{-- <li>
+                    <a href="{{ route('public.cek_nilai') }}" target="_blank" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 text-teal-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0A9 9 0 113 12a9 9 0 0118 0z"></path></svg>
+                        Cek Nilai Publik
+                    </a>
+                </li> --}}
                      
                     <li class="px-4 py-2 text-xs font-bold text-teal-400 uppercase tracking-widest mt-6 mb-2">System</li>
-                    <li>
-                        <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('users.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                            Manajemen User
-                        </a>
-                    </li>
+                    @if(auth()->user()->role === 'super_admin')
+                        <li>
+                            <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('users.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                Manajemen User
+                            </a>
+                        </li>
+                    @endif
                      
                     <li>
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('profile.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
@@ -161,9 +205,9 @@
             <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-8 z-10 sticky top-0">
                 <div class="flex items-center gap-4">
                     <!-- Hamburger Button -->
-                    <button id="sidebar-open-btn" class="md:hidden text-slate-500 hover:text-slate-700 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition">
+                    <label id="sidebar-open-btn" for="sidebar-toggle" role="button" tabindex="0" class="md:hidden text-slate-500 hover:text-slate-700 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition cursor-pointer" aria-controls="sidebar" aria-expanded="false" aria-label="Buka menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                    </button>
+                    </label>
                     
                     <h2 class="text-xl font-bold text-slate-800 truncate">
                         @yield('header', 'Dashboard')
@@ -192,6 +236,11 @@
                             {{ session('success') }}
                         </div>
                     @endif
+                    @if(session('error'))
+                        <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-800 rounded-lg shadow-sm">
+                            {{ session('error') }}
+                        </div>
+                    @endif
                     @yield('content')
                  </div>
             </div>
@@ -199,44 +248,86 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
+            function initMobileSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebar-toggle');
             const overlay = document.getElementById('sidebar-overlay');
             const openBtn = document.getElementById('sidebar-open-btn');
             const closeBtn = document.getElementById('sidebar-close-btn');
 
+            if (!sidebar || !toggle || !overlay || !openBtn || !closeBtn) {
+                return;
+            }
+
             function openSidebar() {
-                sidebar.classList.remove('-translate-x-full');
-                sidebar.classList.add('translate-x-0'); // Force open
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
+                toggle.checked = true;
+                sidebar.classList.add('is-open');
+                sidebar.setAttribute('data-state', 'open');
+                openBtn.setAttribute('aria-expanded', 'true');
+                overlay.classList.add('is-open');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                overlay.classList.add('opacity-100', 'pointer-events-auto');
+                document.body.classList.add('sidebar-open');
             }
 
             function closeSidebar() {
-                sidebar.classList.add('-translate-x-full');
-                sidebar.classList.remove('translate-x-0');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = '';
+                toggle.checked = false;
+                sidebar.classList.remove('is-open');
+                sidebar.setAttribute('data-state', 'closed');
+                openBtn.setAttribute('aria-expanded', 'false');
+                overlay.classList.remove('is-open');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                overlay.classList.remove('opacity-100', 'pointer-events-auto');
+                document.body.classList.remove('sidebar-open');
             }
 
             // Event Listeners
-            openBtn.addEventListener('click', openSidebar);
-            closeBtn.addEventListener('click', closeSidebar);
-            overlay.addEventListener('click', closeSidebar);
+            openBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                openSidebar();
+            });
+            closeBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                closeSidebar();
+            });
+            overlay.addEventListener('click', function(event) {
+                event.preventDefault();
+                closeSidebar();
+            });
+
+            toggle.addEventListener('change', function() {
+                if (toggle.checked) {
+                    openSidebar();
+                } else {
+                    closeSidebar();
+                }
+            });
 
             // Handle Resize
             window.addEventListener('resize', function() {
                 if (window.innerWidth >= 768) {
                     // Reset to default desktop state
-                    // We keep -translate-x-full because md:translate-x-0 overrides it
-                    // But we MUST remove translate-x-0 if it was added manually
-                    sidebar.classList.add('-translate-x-full'); 
-                    sidebar.classList.remove('translate-x-0');
-                    overlay.classList.add('hidden');
-                    document.body.style.overflow = '';
+                    toggle.checked = false;
+                    sidebar.classList.remove('is-open');
+                    sidebar.setAttribute('data-state', 'closed');
+                    openBtn.setAttribute('aria-expanded', 'false');
+                    overlay.classList.remove('is-open');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                    overlay.classList.remove('opacity-100', 'pointer-events-auto');
+                    document.body.classList.remove('sidebar-open');
                 }
             });
-        });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMobileSidebar);
+            } else {
+                initMobileSidebar();
+            }
+        })();
     </script>
+    @yield('scripts')
 </body>
 </html>
