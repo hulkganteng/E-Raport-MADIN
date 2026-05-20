@@ -28,7 +28,7 @@ class KelasController extends Controller
         }
 
         
-        $isAdmin = in_array($user->role, ['super_admin', 'admin', 'kepsek', 'staff']); // Adjust roles as needed
+        $isAdmin = $user->role === 'super_admin';
 
         if ($isAdmin) {
             $kelas = Kelas::with([

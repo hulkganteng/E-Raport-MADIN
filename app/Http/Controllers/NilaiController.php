@@ -21,7 +21,7 @@ class NilaiController extends Controller
         // Logic: Show list of Mapels assigned to this teacher (or all if admin)
         // Grouped by Class
         
-        if ($user->role == 'super_admin' || $user->role == 'kepsek') {
+        if ($user->role == 'super_admin') {
             $kelas = Kelas::with([
                 'kelas_mapel' => function ($query) use ($periode) {
                     $query->where('periode_id', $periode->id)->with(['mapel', 'guru']);
@@ -207,7 +207,7 @@ class NilaiController extends Controller
             return false;
         }
 
-        if (in_array($user->role, ['super_admin', 'kepsek'], true)) {
+        if ($user->role === 'super_admin') {
             return true;
         }
 

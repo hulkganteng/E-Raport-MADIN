@@ -28,7 +28,6 @@
             <select name="role" required class="block w-full px-4 py-3 rounded-lg border-slate-300 bg-slate-50 focus:border-teal-500 focus:ring-teal-500 sm:text-sm @error('role') border-red-500 @enderror">
                 <option value="guru" {{ old('role', $user->role) == 'guru' ? 'selected' : '' }}>Guru Mapel</option>
                 <option value="wali_kelas" {{ old('role', $user->role) == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
-                <option value="kepsek" {{ old('role', $user->role) == 'kepsek' ? 'selected' : '' }}>Kepala Sekolah</option>
                 <option value="super_admin" {{ old('role', $user->role) == 'super_admin' ? 'selected' : '' }}>Staff Admin (Super Admin)</option>
             </select>
             @error('role')

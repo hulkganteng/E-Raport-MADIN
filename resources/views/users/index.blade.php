@@ -34,7 +34,6 @@
                             {{ $user->role == 'admin' ? 'bg-blue-100 text-blue-700' : '' }}
                             {{ $user->role == 'guru' ? 'bg-green-100 text-green-700' : '' }}
                             {{ $user->role == 'wali_kelas' ? 'bg-orange-100 text-orange-700' : '' }}
-                            {{ $user->role == 'kepsek' ? 'bg-red-100 text-red-700' : '' }}
                         ">
                             {{ ucwords(str_replace('_', ' ', $user->role)) }}
                         </span>
@@ -75,7 +74,6 @@
                     {{ $user->role == 'admin' ? 'bg-blue-100 text-blue-700' : '' }}
                     {{ $user->role == 'guru' ? 'bg-green-100 text-green-700' : '' }}
                     {{ $user->role == 'wali_kelas' ? 'bg-orange-100 text-orange-700' : '' }}
-                    {{ $user->role == 'kepsek' ? 'bg-red-100 text-red-700' : '' }}
                 ">
                     {{ ucwords(str_replace('_', ' ', $user->role)) }}
                 </span>

@@ -1,10 +1,10 @@
 # E-Raport MADIN
 
-E-Raport MADIN adalah aplikasi web berbasis Laravel untuk mengelola raport Madrasah Diniyah. Aplikasi ini membantu admin, guru, wali kelas, dan kepala madrasah dalam mengatur data santri, kelas, mata pelajaran, periode pembelajaran, input nilai, rekap raport, ranking, absensi, catatan wali kelas, kenaikan kelas, serta cetak raport dalam format PDF.
+E-Raport MADIN adalah aplikasi web berbasis Laravel untuk mengelola raport Madrasah Diniyah. Aplikasi ini membantu admin, guru, dan wali kelas dalam mengatur data santri, kelas, mata pelajaran, periode pembelajaran, input nilai, rekap raport, ranking, absensi, catatan wali kelas, kenaikan kelas, serta cetak raport dalam format PDF.
 
 ## Ringkasan Fitur
 
-- Login dan manajemen pengguna dengan role `super_admin`, `guru`, `wali_kelas`,.
+- Login dan manajemen pengguna dengan role `super_admin`, `guru`, dan `wali_kelas`.
 - Dashboard statistik jumlah santri aktif, kelas, mapel, dan periode aktif.
 - Manajemen periode semester/tahun ajaran, termasuk aktivasi satu periode yang sedang berjalan.
 - Manajemen data santri lengkap dengan status aktif/nonaktif dan data biodata yang sudah digabung ke tabel santri.
@@ -151,7 +151,7 @@ Masuk sebagai `super_admin`, buka menu periode, lalu buat atau aktifkan periode 
 
 Sebagai `super_admin`, lengkapi data berikut:
 
-- User guru, wali kelas, kepala madrasah, dan admin.
+- User guru, wali kelas, dan admin.
 - Kelas beserta tingkatannya.
 - Mata pelajaran, kategori, tingkatan, dan bobot nilai.
 - Data santri beserta kelas dan statusnya.
@@ -182,7 +182,7 @@ D < 60
 
 ### 6. Rekap Raport
 
-Wali kelas, `super_admin`, atau `kepsek` dapat membuka rekap kelas. Pada halaman ini pengguna dapat:
+Wali kelas atau `super_admin` dapat membuka rekap kelas. Pada halaman ini pengguna dapat:
 
 - Melihat seluruh nilai santri per mapel.
 - Mengisi absensi sakit, izin, dan alpha.
@@ -203,7 +203,6 @@ Menu kenaikan kelas tersedia untuk `super_admin` pada periode aktif. Gunakan fit
 | `super_admin` | Mengelola seluruh data master, user, periode, kelas, mapel, santri, nilai, rekap, cetak raport, dan kenaikan kelas |
 | `guru` | Melihat dashboard dan menginput nilai mapel yang ditugaskan |
 | `wali_kelas` | Mengakses rekap kelas yang menjadi tanggung jawabnya, mengisi absensi/sikap/catatan, dan mencetak raport |
-| `kepsek` | Melihat nilai dan rekap, serta mengakses laporan sesuai izin yang tersedia |
 
 ## Cetak PDF Raport
 

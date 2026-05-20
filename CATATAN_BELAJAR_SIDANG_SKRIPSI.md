@@ -18,7 +18,7 @@ Kalimat pembuka saat presentasi:
 
 ```text
 Assalamu'alaikum warahmatullahi wabarakatuh.
-Pada penelitian ini saya membangun aplikasi E-Raport MADIN, yaitu sistem informasi berbasis web yang digunakan untuk membantu pengelolaan nilai dan raport santri Madrasah Diniyah. Sistem ini dibuat karena proses pengolahan nilai secara manual berisiko menimbulkan keterlambatan, kesalahan perhitungan, dan kesulitan dalam rekapitulasi raport. Dengan aplikasi ini, admin, guru, wali kelas, dan kepala madrasah dapat bekerja sesuai hak akses masing-masing.
+Pada penelitian ini saya membangun aplikasi E-Raport MADIN, yaitu sistem informasi berbasis web yang digunakan untuk membantu pengelolaan nilai dan raport santri Madrasah Diniyah. Sistem ini dibuat karena proses pengolahan nilai secara manual berisiko menimbulkan keterlambatan, kesalahan perhitungan, dan kesulitan dalam rekapitulasi raport. Dengan aplikasi ini, admin, guru, dan wali kelas dapat bekerja sesuai hak akses masing-masing.
 ```
 
 ## Latar Belakang
@@ -42,7 +42,7 @@ Alasan sistem perlu dibuat:
 Jawaban ringkas jika ditanya latar belakang:
 
 ```text
-Latar belakang pembuatan aplikasi ini adalah kebutuhan madrasah untuk mengelola nilai dan raport santri secara lebih efektif. Jika dilakukan manual, proses input nilai, rekap, ranking, dan cetak raport membutuhkan waktu lama serta rawan kesalahan. Karena itu saya membuat sistem berbasis web agar setiap role, seperti admin, guru, wali kelas, dan kepala madrasah, dapat menjalankan tugasnya masing-masing secara terstruktur.
+Latar belakang pembuatan aplikasi ini adalah kebutuhan madrasah untuk mengelola nilai dan raport santri secara lebih efektif. Jika dilakukan manual, proses input nilai, rekap, ranking, dan cetak raport membutuhkan waktu lama serta rawan kesalahan. Karena itu saya membuat sistem berbasis web agar setiap role, seperti admin, guru, dan wali kelas, dapat menjalankan tugasnya masing-masing secara terstruktur.
 ```
 
 ## Rumusan Masalah
@@ -63,7 +63,6 @@ Tujuan utama:
 - Mempermudah admin dalam mengelola data master.
 - Mempermudah guru dalam menginput nilai mapel.
 - Mempermudah wali kelas dalam mengelola rekap raport, absensi, sikap, dan catatan.
-- Mempermudah kepala madrasah dalam melihat laporan nilai.
 - Menghasilkan raport PDF yang siap dicetak.
 
 Jawaban ringkas:
@@ -102,7 +101,7 @@ Batasan sistem:
 - Sistem dibuat berbasis web menggunakan Laravel.
 - Database utama menggunakan MySQL.
 - Sistem fokus pada pengelolaan raport Madrasah Diniyah.
-- Role utama terdiri dari `super_admin`, `guru`, `wali_kelas`,.
+- Role utama terdiri dari `super_admin`, `guru`, dan `wali_kelas`.
 - Input nilai terdiri dari nilai harian dan nilai ujian.
 - Nilai akhir dihitung berdasarkan bobot pada mata pelajaran.
 - Cetak raport menggunakan PDF.
@@ -164,14 +163,12 @@ Role pada sistem:
 | `super_admin` | Mengelola seluruh data master dan semua fitur |
 | `guru` | Menginput nilai mapel yang ditugaskan |
 | `wali_kelas` | Mengelola rekap kelas yang menjadi tanggung jawabnya |
-| `kepsek` | Melihat nilai dan rekap sesuai akses laporan |
 
 Penjelasan:
 
 - `super_admin` memiliki akses penuh.
 - `guru` tidak dapat menginput semua nilai, hanya mapel yang ditugaskan.
 - `wali_kelas` hanya dapat mengakses rekap kelas yang diampu pada periode aktif.
-- `kepsek` dapat melihat nilai dan rekap sebagai pengawas akademik.
 
 Jawaban jika ditanya keamanan akses:
 
@@ -785,15 +782,7 @@ Jawaban:
 Guru bertugas menginput nilai mata pelajaran yang diajarkan. Wali kelas bertugas mengelola rekap kelas, mengisi absensi, sikap, catatan wali kelas, dan mencetak raport.
 ```
 
-### 33. Mengapa kepala madrasah diberi akses?
-
-Jawaban:
-
-```text
-Kepala madrasah membutuhkan akses untuk melihat laporan nilai dan rekap sebagai bentuk pengawasan akademik, tetapi tidak selalu harus mengelola data master seperti admin.
-```
-
-### 34. Apa peran super admin?
+### 33. Apa peran super admin?
 
 Jawaban:
 
@@ -801,7 +790,7 @@ Jawaban:
 Super admin berperan sebagai pengelola utama sistem, mulai dari user, santri, kelas, mapel, periode, pengaturan wali kelas, pengaturan mapel, rekap, cetak raport, dan kenaikan kelas.
 ```
 
-### 35. Bagaimana jika wali kelas berubah di periode berikutnya?
+### 34. Bagaimana jika wali kelas berubah di periode berikutnya?
 
 Jawaban:
 
@@ -809,7 +798,7 @@ Jawaban:
 Karena wali kelas disimpan berdasarkan kelas dan periode, wali kelas dapat diganti pada periode baru tanpa menghapus data wali kelas pada periode sebelumnya.
 ```
 
-### 36. Bagaimana jika guru pengampu berubah?
+### 35. Bagaimana jika guru pengampu berubah?
 
 Jawaban:
 
@@ -817,7 +806,7 @@ Jawaban:
 Guru pengampu disimpan pada data kelas_mapel berdasarkan periode. Jadi perubahan guru dapat dilakukan untuk periode tertentu tanpa mengganggu data periode lain.
 ```
 
-### 37. Apa alasan nilai harian boleh kosong tetapi ujian wajib?
+### 36. Apa alasan nilai harian boleh kosong tetapi ujian wajib?
 
 Jawaban:
 
@@ -825,7 +814,7 @@ Jawaban:
 Pada implementasi ini nilai harian dapat dianggap 0 jika kosong, sedangkan nilai ujian wajib diisi agar sistem tahu bahwa nilai santri memang ingin diproses. Ini juga mencegah data nilai kosong tersimpan tanpa sengaja.
 ```
 
-### 38. Bagaimana sistem menangani format angka Indonesia?
+### 37. Bagaimana sistem menangani format angka Indonesia?
 
 Jawaban:
 
@@ -833,7 +822,7 @@ Jawaban:
 Sistem memiliki parser angka yang dapat membaca format koma sebagai desimal Indonesia, lalu mengubahnya ke format angka yang dapat dihitung oleh program.
 ```
 
-### 39. Apakah sistem bisa digunakan multi-user?
+### 38. Apakah sistem bisa digunakan multi-user?
 
 Jawaban:
 
@@ -841,7 +830,7 @@ Jawaban:
 Ya, sistem mendukung banyak user dengan role berbeda. Setiap user login dengan akun masing-masing dan aksesnya dibatasi sesuai role.
 ```
 
-### 40. Mengapa menggunakan PDF untuk raport?
+### 39. Mengapa menggunakan PDF untuk raport?
 
 Jawaban:
 
@@ -1046,7 +1035,7 @@ Pengembangan lanjutan:
 ## Hafalan Cepat 1 Menit
 
 ```text
-Aplikasi saya adalah E-Raport MADIN, yaitu sistem informasi raport Madrasah Diniyah berbasis Laravel. Sistem ini dibuat untuk membantu pengelolaan data santri, kelas, mapel, periode, input nilai, rekap, ranking, absensi, catatan wali kelas, kenaikan kelas, dan cetak raport PDF. Aplikasi memiliki role super_admin, guru, wali_kelas, dan kepsek. Guru hanya bisa menginput nilai mapel yang ditugaskan, wali kelas mengelola rekap kelasnya, dan admin mengelola data master. Nilai akhir dihitung dari nilai harian dan ujian berdasarkan bobot mapel, lalu sistem menentukan predikat, total, rata-rata, dan ranking secara otomatis.
+Aplikasi saya adalah E-Raport MADIN, yaitu sistem informasi raport Madrasah Diniyah berbasis Laravel. Sistem ini dibuat untuk membantu pengelolaan data santri, kelas, mapel, periode, input nilai, rekap, ranking, absensi, catatan wali kelas, kenaikan kelas, dan cetak raport PDF. Aplikasi memiliki role super_admin, guru, dan wali_kelas. Guru hanya bisa menginput nilai mapel yang ditugaskan, wali kelas mengelola rekap kelasnya, dan admin mengelola data master. Nilai akhir dihitung dari nilai harian dan ujian berdasarkan bobot mapel, lalu sistem menentukan predikat, total, rata-rata, dan ranking secara otomatis.
 ```
 
 ## Hafalan Cepat 3 Menit
@@ -1054,7 +1043,7 @@ Aplikasi saya adalah E-Raport MADIN, yaitu sistem informasi raport Madrasah Dini
 ```text
 E-Raport MADIN adalah aplikasi web berbasis Laravel yang saya bangun untuk membantu proses pengelolaan raport Madrasah Diniyah. Permasalahan yang diangkat adalah proses pengolahan nilai yang jika dilakukan manual dapat memakan waktu lama, rawan salah hitung, dan sulit direkap.
 
-Sistem ini memiliki beberapa role, yaitu super_admin, guru, wali_kelas, dan kepsek. Super admin mengelola data master seperti user, santri, kelas, mapel, periode, wali kelas, dan pengaturan mapel. Guru menginput nilai berdasarkan mapel yang ditugaskan. Wali kelas mengelola rekap kelas, absensi, sikap, catatan, dan cetak raport. Kepala madrasah dapat melihat nilai dan rekap sebagai pengawasan.
+Sistem ini memiliki beberapa role, yaitu super_admin, guru, dan wali_kelas. Super admin mengelola data master seperti user, santri, kelas, mapel, periode, wali kelas, dan pengaturan mapel. Guru menginput nilai berdasarkan mapel yang ditugaskan. Wali kelas mengelola rekap kelas, absensi, sikap, catatan, dan cetak raport.
 
 Proses utama dimulai dari pengaturan periode aktif. Setelah itu admin mengatur data kelas, santri, mapel, guru pengampu, dan wali kelas. Guru kemudian menginput nilai harian dan nilai ujian. Sistem menghitung nilai akhir berdasarkan bobot mapel dan menentukan predikat secara otomatis. Rekap nilai menghitung total, rata-rata, dan ranking santri. Raport dapat dicetak dalam bentuk PDF, baik per santri maupun satu kelas.
 

@@ -32,7 +32,7 @@ class RekapController extends Controller
                         ->where('user_id', auth()->id())
                         ->exists();
 
-        if (!$isWaliKelas && auth()->user()->role !== 'super_admin' && auth()->user()->role !== 'kepsek') {
+        if (!$isWaliKelas && auth()->user()->role !== 'super_admin') {
             return redirect()->route('dashboard')->with('error', 'Akses Ditolak. Anda bukan Wali Kelas untuk kelas ini pada periode aktif.');
         }
 
@@ -68,7 +68,7 @@ class RekapController extends Controller
             ->get()
             ->keyBy('santri_id');
 
-        $canEditAllNilai = in_array(auth()->user()->role, ['super_admin', 'kepsek'], true);
+        $canEditAllNilai = auth()->user()->role === 'super_admin';
         $editableKelasMapelIds = $canEditAllNilai
             ? $kelasMapels->pluck('id')
             : $kelasMapels->where('guru_id', auth()->id())->pluck('id');
@@ -109,7 +109,7 @@ class RekapController extends Controller
                         ->where('user_id', $user->id)
                         ->exists();
 
-        if (!$isWaliKelas && $user->role !== 'super_admin' && $user->role !== 'kepsek') {
+        if (!$isWaliKelas && $user->role !== 'super_admin') {
             return back()->with('error', 'Akses Ditolak. Hanya Wali Kelas yang dapat mengisi Sikap dan Absensi.');
         }
 
@@ -132,7 +132,7 @@ class RekapController extends Controller
             ->where('periode_id', $periode->id)
             ->get()
             ->keyBy('id');
-        $canEditAllNilai = in_array($user->role, ['super_admin', 'kepsek'], true);
+        $canEditAllNilai = $user->role === 'super_admin';
         $editableKelasMapelIds = $canEditAllNilai
             ? $kelasMapels->keys()->map(fn ($id) => (int) $id)->all()
             : $kelasMapels->where('guru_id', $user->id)->keys()->map(fn ($id) => (int) $id)->all();
@@ -477,7 +477,7 @@ class RekapController extends Controller
             return false;
         }
 
-        if (in_array($user->role, ['super_admin', 'kepsek'], true)) {
+        if ($user->role === 'super_admin') {
             return true;
         }
 
