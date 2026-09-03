@@ -3,6 +3,10 @@
 @section('header', 'Manajemen User (Guru & Staff)')
 
 @section('content')
+@php
+    $canViewPasswordColumn = in_array(auth()->user()->role, ['admin', 'super_admin']);
+@endphp
+
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
         <h3 class="text-lg font-bold text-slate-800">Daftar Pengguna</h3>
@@ -19,6 +23,9 @@
                 <tr>
                     <th class="px-6 py-4">Nama Lengkap</th>
                     <th class="px-6 py-4">Email</th>
+                    @if($canViewPasswordColumn)
+                    <th class="px-6 py-4">Password</th>
+                    @endif
                     <th class="px-6 py-4">Role</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
@@ -28,6 +35,22 @@
                 <tr class="hover:bg-slate-50 transition">
                     <td class="px-6 py-4 font-medium text-slate-800">{{ $user->name }}</td>
                     <td class="px-6 py-4">{{ $user->email }}</td>
+                    @if($canViewPasswordColumn)
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="password-value max-w-48 truncate font-mono tracking-wider text-slate-400" data-hidden="********" data-visible="Tidak tersedia">********</span>
+                            <button type="button" onclick="toggleUserPassword(this)" class="p-1.5 text-slate-400 hover:text-teal-600 rounded-md hover:bg-teal-50 transition" aria-label="Tampilkan password">
+                                <svg class="eye-open w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <svg class="eye-closed hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.162-3.328m3.31-2.231A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.971 9.971 0 01-4.293 5.165M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l8 8M3 3l18 18"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                    @endif
                     <td class="px-6 py-4">
                         <span class="inline-flex px-2 py-1 text-xs font-bold leading-5 rounded-md 
                             {{ $user->role == 'super_admin' ? 'bg-purple-100 text-purple-700' : '' }}
@@ -40,15 +63,17 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center gap-2">
-                            <a href="{{ route('users.edit', $user) }}" class="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition">
+                            <a href="{{ route('users.edit', $user) }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition text-xs font-semibold" aria-label="Edit {{ $user->name }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                Edit
                             </a>
                             @if(auth()->id() !== $user->id)
                             <form action="{{ route('users.destroy', $user) }}" method="POST" onsubmit="return confirm('Yakin hapus user ini?');" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-xs font-semibold" aria-label="Hapus {{ $user->name }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    Hapus
                                 </button>
                             </form>
                             @endif
@@ -68,6 +93,20 @@
                 <div class="flex-1">
                     <h4 class="font-semibold text-slate-800">{{ $user->name }}</h4>
                     <p class="text-xs text-slate-500 mt-1">{{ $user->email }}</p>
+                    @if($canViewPasswordColumn)
+                    <p class="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                        <span>Password: <span class="password-value font-mono tracking-wider break-all" data-hidden="********" data-visible="Tidak tersedia">********</span></span>
+                        <button type="button" onclick="toggleUserPassword(this)" class="p-1 text-slate-400 hover:text-teal-600 rounded-md hover:bg-teal-50 transition" aria-label="Tampilkan password">
+                            <svg class="eye-open w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <svg class="eye-closed hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.162-3.328m3.31-2.231A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.971 9.971 0 01-4.293 5.165M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l8 8M3 3l18 18"></path>
+                            </svg>
+                        </button>
+                    </p>
+                    @endif
                 </div>
                 <span class="inline-flex px-2 py-1 text-xs font-bold leading-5 rounded-md 
                     {{ $user->role == 'super_admin' ? 'bg-purple-100 text-purple-700' : '' }}
@@ -96,4 +135,20 @@
         @endforeach
     </div>
 </div>
+
+<script>
+    function toggleUserPassword(button) {
+        const container = button.closest('td, p');
+        const passwordValue = container.querySelector('.password-value');
+        const isVisible = passwordValue.dataset.visibleState === 'true';
+
+        passwordValue.textContent = isVisible ? passwordValue.dataset.hidden : passwordValue.dataset.visible;
+        passwordValue.dataset.visibleState = isVisible ? 'false' : 'true';
+        passwordValue.classList.toggle('truncate', isVisible);
+        passwordValue.classList.toggle('break-all', !isVisible);
+        button.setAttribute('aria-label', isVisible ? 'Tampilkan password' : 'Sembunyikan password');
+        button.querySelector('.eye-open').classList.toggle('hidden', !isVisible);
+        button.querySelector('.eye-closed').classList.toggle('hidden', isVisible);
+    }
+</script>
 @endsection

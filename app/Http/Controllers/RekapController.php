@@ -258,7 +258,7 @@ class RekapController extends Controller
                             $q->where('kelas_id', $santri->kelas_id);
                         })->count();
 
-        $logoSrc = $pdfRenderer->toFileUrl(public_path('logo.jpg'));
+        $logoSrc = $pdfRenderer->toFileUrl(lembaga_logo_path());
 
         return $pdfRenderer->streamView('rekap.print', compact(
             'santri',
@@ -319,7 +319,7 @@ class RekapController extends Controller
             $data[] = compact('santri', 'periode', 'rekap', 'absensi', 'nilaiMapel', 'totalSantri');
         }
 
-        $logoSrc = $pdfRenderer->toFileUrl(public_path('logo.jpg'));
+        $logoSrc = $pdfRenderer->toFileUrl(lembaga_logo_path());
 
         return $pdfRenderer->streamView('rekap.print_all', compact(
             'data',
@@ -328,6 +328,133 @@ class RekapController extends Controller
             'copies',
             'logoSrc'
         ), 'RAPOT_KELAS_' . $kelas->nama_kelas . '.pdf');
+    }
+
+    public function previewRapot(Request $request, Santri $santri)
+    {
+        $periode = $this->resolvePeriode($request->input('periode_id'));
+        $copies = $this->normalizeCopies($request->input('copies', 1));
+        $santri->loadMissing('kelas');
+        if (!$this->canAccessKelasRapot($santri->kelas, $periode)) {
+            return redirect()->route('dashboard')->with('error', 'Akses Ditolak. Anda tidak dapat melihat rapot kelas ini.');
+        }
+
+        $this->ensureRekapExists($santri->kelas, $periode);
+
+        $missingGrades = $this->missingRapotGrades($santri, $santri->kelas, $periode);
+        if (!empty($missingGrades)) {
+            return back()->with(
+                'error',
+                'Rapot ' . $santri->nama_lengkap . ' belum bisa dipratinjau karena nilai belum lengkap: ' . implode(', ', $missingGrades) . '.'
+            );
+        }
+
+        $rekap = RekapNilai::where('santri_id', $santri->id)->where('periode_id', $periode->id)->first();
+        $absensi = Absensi::where('santri_id', $santri->id)->where('periode_id', $periode->id)->first();
+        $nilaiMapel = NilaiMapel::with(['kelasMapel.mapel'])
+                    ->where('santri_id', $santri->id)
+                    ->where('periode_id', $periode->id)
+                    ->whereHas('kelasMapel', function ($query) use ($santri, $periode) {
+                        $query->where('kelas_id', $santri->kelas_id)
+                            ->where('periode_id', $periode->id);
+                    })
+                    ->get();
+
+        $totalSantri = RekapNilai::where('periode_id', $periode->id)
+                        ->whereHas('santri', function ($q) use ($santri) {
+                            $q->where('kelas_id', $santri->kelas_id);
+                        })->count();
+
+        $pages = [compact('santri', 'periode', 'rekap', 'absensi', 'nilaiMapel', 'totalSantri')];
+
+        return view('rekap.preview', [
+            'pages' => $pages,
+            'title' => 'Rapot ' . $santri->nama_lengkap,
+            'subtitle' => $santri->kelas->nama_kelas . ' • ' . $periode->nama_periode,
+            'downloadUrl' => route('rekap.print', $santri->id) . '?' . http_build_query([
+                'periode_id' => $periode->id,
+                'copies' => $copies,
+            ]),
+            'backUrl' => route('rekap.index', $santri->kelas_id),
+            'logoSrc' => lembaga_logo_url(),
+            'fontFaces' => $this->arabicFontFaces(),
+        ]);
+    }
+
+    public function previewAllRapot(Request $request, Kelas $kelas)
+    {
+        $periode = $this->resolvePeriode($request->input('periode_id'));
+        $copies = $this->normalizeCopies($request->input('copies', 1));
+        if (!$this->canAccessKelasRapot($kelas, $periode)) {
+            return redirect()->route('dashboard')->with('error', 'Akses Ditolak. Anda tidak dapat melihat rapot kelas ini.');
+        }
+
+        $this->ensureRekapExists($kelas, $periode);
+
+        $santris = Santri::where('kelas_id', $kelas->id)->where('status', 'aktif')->orderBy('nama_lengkap')->get();
+        $incompleteSantris = $santris
+            ->filter(fn ($santri) => !empty($this->missingRapotGrades($santri, $kelas, $periode)))
+            ->pluck('nama_lengkap')
+            ->values();
+
+        if ($incompleteSantris->isNotEmpty()) {
+            $names = $incompleteSantris->take(5)->implode(', ');
+            $remaining = $incompleteSantris->count() - 5;
+            $suffix = $remaining > 0 ? ' dan ' . $remaining . ' santri lainnya' : '';
+
+            return back()->with(
+                'error',
+                'Pratinjau semua rapot ditolak karena masih ada nilai yang belum lengkap untuk: ' . $names . $suffix . '.'
+            );
+        }
+
+        $totalSantri = $santris->count();
+        $pages = [];
+        foreach ($santris as $santri) {
+            $rekap = RekapNilai::where('santri_id', $santri->id)->where('periode_id', $periode->id)->first();
+            $absensi = Absensi::where('santri_id', $santri->id)->where('periode_id', $periode->id)->first();
+            $nilaiMapel = NilaiMapel::with(['kelasMapel.mapel'])
+                        ->where('santri_id', $santri->id)
+                        ->where('periode_id', $periode->id)
+                        ->whereHas('kelasMapel', function ($query) use ($kelas, $periode) {
+                            $query->where('kelas_id', $kelas->id)
+                                ->where('periode_id', $periode->id);
+                        })
+                        ->get();
+
+            $pages[] = compact('santri', 'periode', 'rekap', 'absensi', 'nilaiMapel', 'totalSantri');
+        }
+
+        return view('rekap.preview', [
+            'pages' => $pages,
+            'title' => 'Rapot Kelas ' . $kelas->nama_kelas,
+            'subtitle' => $totalSantri . ' santri • ' . $periode->nama_periode,
+            'downloadUrl' => route('rekap.print_all', $kelas->id) . '?' . http_build_query([
+                'periode_id' => $periode->id,
+                'copies' => $copies,
+            ]),
+            'backUrl' => route('rekap.index', $kelas->id),
+            'logoSrc' => lembaga_logo_url(),
+            'fontFaces' => $this->arabicFontFaces(),
+        ]);
+    }
+
+    private function arabicFontFaces(): string
+    {
+        $regularPath = resource_path('fonts/arabtype.ttf');
+        $boldPath = resource_path('fonts/tradbdo.ttf');
+
+        $faces = '';
+        if (is_file($regularPath)) {
+            $regular = base64_encode((string) file_get_contents($regularPath));
+            $faces .= "@font-face{font-family:'ArabicNaskh';font-style:normal;font-weight:400;src:url(data:font/truetype;base64,{$regular}) format('truetype');}";
+        }
+        if (is_file($boldPath)) {
+            $bold = base64_encode((string) file_get_contents($boldPath));
+            $faces .= "@font-face{font-family:'ArabicNaskh';font-style:normal;font-weight:700;src:url(data:font/truetype;base64,{$bold}) format('truetype');}";
+        }
+
+        return $faces;
     }
 
     private function ensureRekapExists($kelas, $periode)
@@ -457,17 +584,7 @@ class RekapController extends Controller
 
     private function resolvePredikat(float $akhir): string
     {
-        if ($akhir >= 85) {
-            return 'A';
-        }
-        if ($akhir >= 75) {
-            return 'B';
-        }
-        if ($akhir >= 60) {
-            return 'C';
-        }
-
-        return 'D';
+        return resolve_predikat($akhir);
     }
 
     private function canAccessKelasRapot(Kelas $kelas, Periode $periode): bool

@@ -63,7 +63,7 @@
                                         $record = $assignments->get($mapel->id);
                                         $isChecked = $record ? true : false;
                                         $currentGuruId = $record ? $record->guru_id : null;
-                                        $currentKkm = $record ? $record->kkm : 65;
+                                        $currentKkm = $record ? $record->kkm : lembaga_setting('kkm_default', 65);
                                     @endphp
                                     <tr class="hover:bg-slate-50 transition">
                                         <td class="px-4 py-3 text-center">

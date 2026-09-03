@@ -50,7 +50,7 @@ class RaportArabic
     ];
 
     private const SUBJECTS = [
-        'AKHLAK' => 'الأخلاق',
+        'AKHLAQ' => 'الأخلاق',
         'HADITS' => 'الحديث',
         'HADIST' => 'الحديث',
         'FIQIH' => 'الفقه',
@@ -66,6 +66,7 @@ class RaportArabic
         'BAHASAARAB' => 'اللغة العربية',
         'FAROIDH' => 'الفرائض',
         'BMK' => 'تعليم قراءة الكتاب',
+        'Al qurab' =>' القر ءان',
     ];
 
     public static function digits(string|int|float|null $value): string

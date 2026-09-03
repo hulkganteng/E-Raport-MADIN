@@ -53,14 +53,16 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center gap-2">
-                            <a href="{{ route('periode.edit', $periode->id) }}" class="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition">
+                            <a href="{{ route('periode.edit', $periode->id) }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition text-xs font-semibold" aria-label="Edit {{ $periode->nama_periode }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                Edit
                             </a>
                             <form action="{{ route('periode.destroy', $periode->id) }}" method="POST" onsubmit="return confirm('Nonaktifkan periode ini? Data nilai, absensi, rekap, dan riwayat tetap tersimpan.');" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed" {{ $periode->is_active ? '' : 'disabled' }} title="{{ $periode->is_active ? 'Nonaktifkan periode' : 'Periode sudah nonaktif' }}">
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed" {{ $periode->is_active ? '' : 'disabled' }} title="{{ $periode->is_active ? 'Nonaktifkan periode' : 'Periode sudah nonaktif' }}" aria-label="Nonaktifkan {{ $periode->nama_periode }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v9m6.364-6.364a9 9 0 11-12.728 0"></path></svg>
+                                    Nonaktifkan
                                 </button>
                             </form>
                         </div>

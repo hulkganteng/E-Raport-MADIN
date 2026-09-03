@@ -7,7 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class Santri extends Model
 {
     protected $table = 'santri';
-    protected $guarded = [];
+    protected $fillable = [
+        'nis',
+        'nama_lengkap',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'alamat',
+        'no_hp_ortu',
+        'pin_orangtua',
+        'kelas_id',
+        'status',
+    ];
 
     public function kelas()
     {

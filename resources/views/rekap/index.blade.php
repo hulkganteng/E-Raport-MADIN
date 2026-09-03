@@ -69,7 +69,7 @@
                 <p class="text-xs text-slate-500">Pastikan semua nilai mapel sudah diinput sebelum hitung ranking.</p>
                 <p class="text-xs text-slate-500 mt-1">Kelola cetak rapot dengan memilih tahun ajaran & jumlah salinan sebelum dicetak.</p>
             </div>
-            <form action="{{ route('rekap.print_all', $kelas->id) }}" method="GET" target="_blank" class="flex flex-col md:flex-row items-end gap-2">
+            <form action="{{ route('rekap.preview_all', $kelas->id) }}" method="GET" target="_blank" class="flex flex-col md:flex-row items-end gap-2">
                 <div class="flex flex-col text-xs text-slate-600">
                     <label class="font-semibold">Tahun Ajaran / Periode</label>
                     <select name="periode_id" class="mt-1 w-48 md:w-52 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
@@ -85,8 +85,8 @@
                     <input type="number" name="copies" value="1" min="1" max="10" class="mt-1 w-32 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition text-sm font-bold shadow-md flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    Cetak Semua Rapot
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    Pratinjau Semua Rapot
                 </button>
             </form>
         </div>
@@ -139,11 +139,11 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     Edit Nilai
                                 </button>
-                                <a href="{{ route('rekap.print', $rekap->santri_id) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-lg hover:bg-slate-700 transition">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                    Cetak Cepat
+                                <a href="{{ route('rekap.preview', $rekap->santri_id) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-lg hover:bg-slate-700 transition">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    Pratinjau
                                 </a>
-                                <button type="button" data-url="{{ route('rekap.print', $rekap->santri_id) }}" data-name="Rapot {{ $rekap->santri->nama_lengkap }}" data-periode-id="{{ $periode->id }}" onclick="openPrintModal(this)" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs rounded-lg hover:bg-slate-50 transition shadow-sm">
+                                <button type="button" data-url="{{ route('rekap.preview', $rekap->santri_id) }}" data-name="Rapot {{ $rekap->santri->nama_lengkap }}" data-periode-id="{{ $periode->id }}" onclick="openPrintModal(this)" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs rounded-lg hover:bg-slate-50 transition shadow-sm">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                                     Atur Cetak
                                 </button>
@@ -326,8 +326,8 @@
         <form method="GET" id="print-modal-form" target="_blank" class="bg-white p-6 space-y-4">
             <div class="flex items-start justify-between gap-3">
                 <div>
-                    <h3 class="font-bold text-lg text-slate-800">Atur Cetak Rapot</h3>
-                    <p class="text-sm text-slate-600" id="print-modal-student">Pilih santri dari tabel untuk mencetak.</p>
+                    <h3 class="font-bold text-lg text-slate-800">Atur & Pratinjau Rapot</h3>
+                    <p class="text-sm text-slate-600" id="print-modal-student">Pilih santri dari tabel untuk pratinjau.</p>
                 </div>
                 <button type="button" onclick="closePrintModal()" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -353,7 +353,7 @@
 
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closePrintModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm">Batal</button>
-                <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm font-bold shadow-md shadow-teal-500/30">Cetak Rapot</button>
+                <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm font-bold shadow-md shadow-teal-500/30">Pratinjau Rapot</button>
             </div>
         </form>
     </dialog>

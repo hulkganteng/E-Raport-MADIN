@@ -54,7 +54,7 @@
     $catatanGuru = trim((string) ($rekap->catatan_wali ?? ''));
     $namaKepalaMadrasah = trim((string) ($periode->nama_kepala_madrasah ?? ''));
     if ($namaKepalaMadrasah === '') {
-        $namaKepalaMadrasah = 'M. SHOLAHUDDIN MALIKI, S.Pd.I';
+        $namaKepalaMadrasah = strtoupper((string) lembaga_setting('nama_kepala', 'KEPALA LEMBAGA'));
     }
     $waliKelasName = \App\Models\WaliKelas::with('user')
         ->where('kelas_id', $santri->kelas_id)
@@ -67,13 +67,20 @@
 
 <div class="report-page">
     <div class="header">
-        <img src="{{ $logoSrc ?? ('file:///' . str_replace('\\', '/', public_path('logo.jpg'))) }}" alt="Logo" class="logo">
+        <img src="{{ $logoSrc ?? lembaga_logo_path() }}" alt="Logo" class="logo">
         <div class="header-text">
-            <h3>MADRASAH DINIYAH</h3>
-            <h3>PONDOK PESANTREN ASSYAFI'IYAH</h3>
-            <p>321235250108</p>
-            <p>JL. NONGKO KEREP RT 02 RW 01, BUNGAH, BUNGAH, GRESIK, JAWA TIMUR, 61152</p>
-            <p>Email: assyafiyahbungahgresik@gmail.com</p>
+            <h3>{{ strtoupper((string) lembaga_setting('jenjang', 'LEMBAGA')) }}</h3>
+            <h3>{{ strtoupper((string) lembaga_setting('nama_lembaga', 'PONDOK PESANTREN')) }}</h3>
+            @if(trim((string) lembaga_setting('nsm', '')) !== '')
+            <p>{{ lembaga_setting('nsm') }}</p>
+            @endif
+            @if(trim((string) lembaga_setting('npsn', '')) !== '')
+            <p>{{ 'NPSN: ' . lembaga_setting('npsn') }}</p>
+            @endif
+            <p>{{ strtoupper((string) (trim((string) lembaga_setting('alamat', '')) !== '' ? lembaga_setting('alamat') : lembaga()?->fullAddress())) }}</p>
+            @if(trim((string) lembaga_setting('email', '')) !== '')
+            <p>Email: {{ lembaga_setting('email') }}</p>
+            @endif
         </div>
     </div>
 

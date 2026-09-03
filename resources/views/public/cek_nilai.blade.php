@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cek Nilai - {{ config('app.name', 'Rapot Madin') }}</title>
+    <title>Cek Nilai - {{ lembaga_setting('nama_lembaga', config('app.name', 'Rapot')) }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -21,10 +21,10 @@
         <div class="bg-white rounded-3xl shadow-xl p-8 sm:p-10 border border-slate-100">
             <div class="text-center mb-6">
                 <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 p-1 shadow-lg shadow-emerald-100">
-                    <img src="{{ asset('logo.jpg') }}" alt="Logo Madin" class="w-full h-full rounded-full object-cover">
+                    <img src="{{ lembaga_logo_url() }}" alt="Logo Lembaga" class="w-full h-full rounded-full object-cover" onerror="this.style.display='none'">
                 </div>
                 <h1 class="mt-4 text-2xl font-bold text-slate-800">Cek Nilai Rapot</h1>
-                <p class="text-sm text-emerald-600 font-semibold tracking-wide">Masukkan NIS & Nama Lengkap</p>
+                <p class="text-sm text-emerald-600 font-semibold tracking-wide">{{ lembaga_setting('nama_lembaga', 'Madrasah Diniyah') }} — Masukkan NIS & Nama Lengkap</p>
                 @if($periode)
                     <p class="text-xs text-slate-500 mt-1">Periode Aktif: {{ $periode->nama_periode }} ({{ ucfirst($periode->semester ?? 'ganjil') }})</p>
                 @else

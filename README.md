@@ -7,6 +7,7 @@ E-Raport MADIN adalah aplikasi web berbasis Laravel untuk mengelola raport Madra
 - Login dan manajemen pengguna dengan role `super_admin`, `guru`, dan `wali_kelas`.
 - Dashboard statistik jumlah santri aktif, kelas, mapel, dan periode aktif.
 - Manajemen periode semester/tahun ajaran, termasuk aktivasi satu periode yang sedang berjalan.
+- **Pengaturan lembaga**: konfigurasi identitas lembaga (nama, jenjang, logo, alamat, kontak, NPSN/NSM), kepala lembaga, serta batas nilai predikat dan KKM default. Branding pada sidebar, login, halaman cek nilai, dan kop raport mengikuti pengaturan ini sehingga aplikasi dapat dipakai oleh lembaga lain.
 - Manajemen data santri lengkap dengan status aktif/nonaktif dan data biodata yang sudah digabung ke tabel santri.
 - Manajemen kelas, wali kelas per periode, dan riwayat kelas santri.
 - Manajemen mata pelajaran dengan kategori, tingkatan, serta bobot nilai harian dan ujian.
@@ -147,7 +148,16 @@ Buka halaman `/login`, lalu masuk menggunakan akun yang tersedia. Halaman utama 
 
 Masuk sebagai `super_admin`, buka menu periode, lalu buat atau aktifkan periode semester/tahun ajaran. Fitur input nilai, rekap, dan kenaikan kelas membutuhkan periode aktif.
 
-### 3. Kelola Data Master
+### 3. Atur Pengaturan Lembaga
+
+Sebagai `super_admin`, buka menu **Pengaturan Lembaga** untuk mengisi:
+
+- Identitas lembaga: nama, jenjang/jenis, NPSN/NSM/NSS, logo, alamat (desa, kecamatan, kabupaten, provinsi, kode pos), kontak (telepon, email, website), dan kepala lembaga.
+- Pengaturan akademik: KKM default dan batas nilai untuk predikat A/B/C/D.
+
+Perubahan langsung tampil pada sidebar, halaman login, halaman cek nilai, dan kop raport.
+
+### 4. Kelola Data Master
 
 Sebagai `super_admin`, lengkapi data berikut:
 
@@ -156,7 +166,7 @@ Sebagai `super_admin`, lengkapi data berikut:
 - Mata pelajaran, kategori, tingkatan, dan bobot nilai.
 - Data santri beserta kelas dan statusnya.
 
-### 4. Atur Wali Kelas dan Mapel
+### 5. Atur Wali Kelas dan Mapel
 
 Pada menu kelas, atur:
 
@@ -164,14 +174,14 @@ Pada menu kelas, atur:
 - Mata pelajaran yang berlaku di kelas tersebut.
 - Guru pengampu untuk setiap mapel.
 
-### 5. Input Nilai
+### 6. Input Nilai
 
 Guru membuka menu nilai, memilih kelas dan mapel yang menjadi tugasnya, lalu mengisi:
 
 - Nilai harian
 - Nilai ujian
 
-Nilai akhir dihitung otomatis berdasarkan bobot pada mapel. Predikat otomatis mengikuti nilai akhir:
+Nilai akhir dihitung otomatis berdasarkan bobot pada mapel. Predikat otomatis mengikuti nilai akhir dan batas nilai dapat diatur melalui menu **Pengaturan Lembaga** (default):
 
 ```text
 A >= 85
@@ -180,7 +190,7 @@ C >= 60
 D < 60
 ```
 
-### 6. Rekap Raport
+### 7. Rekap Raport
 
 Wali kelas atau `super_admin` dapat membuka rekap kelas. Pada halaman ini pengguna dapat:
 
@@ -191,7 +201,7 @@ Wali kelas atau `super_admin` dapat membuka rekap kelas. Pada halaman ini penggu
 - Mencetak raport per santri.
 - Mencetak seluruh raport dalam satu kelas.
 
-### 7. Kenaikan Kelas
+### 8. Kenaikan Kelas
 
 Menu kenaikan kelas tersedia untuk `super_admin` pada periode aktif. Gunakan fitur ini setelah data nilai dan rekap selesai diperiksa.
 

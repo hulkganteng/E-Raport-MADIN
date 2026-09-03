@@ -7,7 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class NilaiMapel extends Model
 {
     protected $table = 'nilai_mapel';
-    protected $guarded = [];
+    protected $fillable = [
+        'santri_id',
+        'kelas_mapel_id',
+        'periode_id',
+        'nilai_tugas',
+        'nilai_uts',
+        'nilai_uas',
+        'nilai_akhir',
+        'predikat',
+        'deskripsi',
+    ];
 
     public function santri()
     {

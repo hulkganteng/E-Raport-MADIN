@@ -24,6 +24,17 @@ class DatabaseSeeder extends Seeder
             'role' => 'super_admin',
         ]);
 
+        \App\Models\Lembaga::create([
+            'nama_lembaga' => 'Madrasah Diniyah ASSYAFI\'IYAH',
+            'jenjang' => 'Madrasah Diniyah',
+            'alamat' => 'Bungah, Kabupaten Gresik, Jawa Timur',
+            'email' => 'assyafiyahbungahgresik@gmail.com',
+            'kkm_default' => 75,
+            'grade_min_a' => 85,
+            'grade_min_b' => 75,
+            'grade_min_c' => 60,
+        ]);
+
         \App\Models\Periode::create([
             'nama_periode' => 'Semester Ganjil 2024/2025',
             'start_date' => '2024-07-01',

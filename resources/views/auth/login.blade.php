@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login - {{ config('app.name', 'Rapot Madin') }}</title>
+    <title>Login - {{ lembaga_setting('nama_lembaga', config('app.name', 'E-Raport')) }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -60,11 +60,11 @@
             <div class="text-center mb-8 animate-fade-in-up delay-100">
                 <div class="inline-block animate-float">
                     <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 p-1 shadow-lg shadow-emerald-100">
-                        <img src="{{ asset('logo.jpg') }}" alt="Logo Madin" class="w-full h-full rounded-full object-cover">
+                        <img src="{{ lembaga_logo_url() }}" alt="Logo Lembaga" class="w-full h-full rounded-full object-cover" onerror="this.style.display='none'">
                     </div>
                 </div>
                 <h1 class="mt-4 text-2xl font-bold text-slate-800">Rapot Digital</h1>
-                <p class="text-sm text-emerald-600 font-semibold tracking-wide">Madrasah Diniyah Assyafi'iyah</p>
+                <p class="text-sm text-emerald-600 font-semibold tracking-wide">{{ lembaga_setting('nama_lembaga', 'Madrasah Diniyah') }}</p>
             </div>
 
             <!-- Welcome Text -->
@@ -170,7 +170,7 @@
             
             <!-- Footer -->
             <div class="mt-8 text-center animate-fade-in delay-500">
-                <p class="text-xs text-slate-400">&copy; {{ date('Y') }} Madrasah Diniyah Assyafi'iyah</p>
+                <p class="text-xs text-slate-400">&copy; {{ date('Y') }} {{ lembaga_setting('nama_lembaga', 'Lembaga') }}</p>
                 <!-- <div class="mt-4">
                     <a href="{{ route('public.cek_nilai') }}" class="inline-flex items-center gap-2 text-emerald-700 text-sm font-semibold hover:text-emerald-800">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>

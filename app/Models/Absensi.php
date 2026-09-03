@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Absensi extends Model
 {
     protected $table = 'absensi';
-    protected $guarded = [];
+    protected $fillable = [
+        'santri_id',
+        'periode_id',
+        'sakit',
+        'izin',
+        'alpha',
+    ];
 
     public function santri()
     {

@@ -167,10 +167,7 @@ class NilaiController extends Controller
                 $akhir = round((($harian * $bobotHarian) + ($ujian * $bobotUjian)) / $totalBobot, 2);
                 
                 // Determine Predikat (Simple Logic)
-                $predikat = 'D';
-                if ($akhir >= 85) $predikat = 'A';
-                elseif ($akhir >= 75) $predikat = 'B';
-                elseif ($akhir >= 60) $predikat = 'C';
+                $predikat = resolve_predikat($akhir);
 
                 NilaiMapel::updateOrCreate(
                     [

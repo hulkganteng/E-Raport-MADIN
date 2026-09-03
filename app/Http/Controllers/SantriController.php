@@ -17,7 +17,7 @@ class SantriController extends Controller
             $query->where('kelas_id', $request->kelas_id);
         }
 
-        $santris = $query->paginate(20);
+        $santris = $query->paginate(15)->appends($request->query());
         $kelas = Kelas::all();
         
         return view('santri.index', compact('santris', 'kelas'));

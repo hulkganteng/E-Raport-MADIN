@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Rapot Madin') }}</title>
+    <title>{{ lembaga_setting('nama_lembaga', config('app.name', 'E-Raport')) }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -58,11 +58,11 @@
                  <div class="flex items-center gap-3 min-w-0">
                      <!-- Logo small in sidebar -->
                      <div class="w-8 h-8 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0">
-                        <img src="{{ asset('logo.jpg') }}" class="w-full h-full rounded-full object-cover">
+                        <img src="{{ lembaga_logo_url() }}" alt="Logo" class="w-full h-full rounded-full object-cover" onerror="this.style.display='none'">
                      </div>
                     <div class="overflow-hidden">
-                        <h1 class="text-lg font-bold tracking-tight whitespace-nowrap">Rapot Madin</h1>
-                        <p class="text-[10px] text-teal-300 uppercase tracking-widest whitespace-nowrap">Assyafi'iyah</p>
+                        <h1 class="text-lg font-bold tracking-tight whitespace-nowrap">{{ lembaga_setting('nama_lembaga', 'E-Raport') }}</h1>
+                        <p class="text-[10px] text-teal-300 uppercase tracking-widest whitespace-nowrap">{{ lembaga_setting('jenjang', 'Lembaga') }}</p>
                         @if(isset($globalActivePeriode))
                         <div class="mt-1 px-2 py-0.5 bg-teal-800 rounded text-[10px] text-teal-100 font-mono">
                             {{ $globalActivePeriode->nama_periode }} ({{ $globalActivePeriode->semester }})
@@ -179,8 +179,17 @@
                         </li>
                     @endif
                      
-                    <li>
-                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('profile.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
+                     @if(auth()->user()->role === 'super_admin')
+                         <li>
+                             <a href="{{ route('pengaturan.edit') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('pengaturan.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
+                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                 Pengaturan Lembaga
+                             </a>
+                         </li>
+                     @endif
+
+                     <li>
+                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 rounded-xl hover:bg-teal-800 transition flex items-center gap-3 {{ request()->routeIs('profile.*') ? 'bg-teal-800 text-white' : 'text-teal-100' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             Edit Profil
                         </a>
@@ -231,6 +240,41 @@
                  <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-teal-100/50 to-transparent pointer-events-none"></div>
                  
                  <div class="relative z-0 max-w-7xl mx-auto">
+                    @php
+                        $contextualHelp = null;
+
+                        if (request()->routeIs('dashboard')) {
+                            $contextualHelp = 'Gunakan checklist di dashboard untuk memastikan data tahun ajar sudah siap sebelum guru mulai input nilai.';
+                        } elseif (request()->routeIs('santri.*')) {
+                            $contextualHelp = 'Data santri aktif akan muncul pada input nilai, rekap raport, dan proses kenaikan kelas.';
+                        } elseif (request()->routeIs('mapel.*')) {
+                            $contextualHelp = 'Pastikan bobot nilai harian dan ujian berjumlah 100 persen agar nilai akhir dihitung dengan benar.';
+                        } elseif (request()->routeIs('kelas.manage_mapel')) {
+                            $contextualHelp = 'Centang mapel yang dipakai di kelas ini, lalu pilih guru pengampu dan isi KKM untuk setiap mapel.';
+                        } elseif (request()->routeIs('kelas.manage_wali') || request()->routeIs('kelas.edit_wali')) {
+                            $contextualHelp = 'Satu user hanya bisa menjadi wali kelas pada satu kelas dalam periode aktif yang sama.';
+                        } elseif (request()->routeIs('kelas.*')) {
+                            $contextualHelp = 'Setelah kelas dibuat, lanjutkan dengan mengatur wali kelas serta mapel dan guru pengampu.';
+                        } elseif (request()->routeIs('nilai.*')) {
+                            $contextualHelp = 'Isi nilai 0 sampai 100. Nilai akhir dan predikat akan dihitung otomatis setelah data disimpan.';
+                        } elseif (request()->routeIs('rekap.*')) {
+                            $contextualHelp = 'Lengkapi absensi, sikap, catatan wali kelas, dan ranking sebelum mencetak raport.';
+                        } elseif (request()->routeIs('periode.*')) {
+                            $contextualHelp = 'Hanya satu periode yang boleh aktif. Periode aktif menjadi acuan input nilai, rekap, dan kenaikan kelas.';
+                        } elseif (request()->routeIs('users.*')) {
+                            $contextualHelp = 'Buat akun sesuai tugas pengguna. Guru dapat input nilai, wali kelas dapat mengelola rekap kelas.';
+                        } elseif (request()->routeIs('pengaturan.*')) {
+                            $contextualHelp = 'Atur identitas lembaga, logo, alamat, dan batas nilai predikat. Perubahan langsung tampil pada sidebar, login, dan raport.';
+                        }
+                    @endphp
+
+                    @if($contextualHelp)
+                        <div class="mb-6 p-4 bg-sky-50 border border-sky-100 text-sky-800 rounded-xl shadow-sm flex gap-3">
+                            <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white text-xs font-bold">i</div>
+                            <p class="text-sm leading-relaxed">{{ $contextualHelp }}</p>
+                        </div>
+                    @endif
+
                     @if(session('success'))
                         <div class="mb-6 p-4 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 rounded-lg shadow-sm">
                             {{ session('success') }}

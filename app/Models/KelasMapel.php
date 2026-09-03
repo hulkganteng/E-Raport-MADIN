@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class KelasMapel extends Model
 {
     protected $table = 'kelas_mapel';
-    protected $guarded = [];
+    protected $fillable = [
+        'kelas_id',
+        'mapel_id',
+        'guru_id',
+    ];
 
     public function kelas()
     {

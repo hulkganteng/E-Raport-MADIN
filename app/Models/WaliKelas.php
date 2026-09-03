@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class WaliKelas extends Model
 {
     protected $table = 'wali_kelas';
-    protected $guarded = [];
+    protected $fillable = [
+        'nama',
+        'nip',
+        'no_hp',
+        'alamat',
+        'user_id',
+    ];
 
     public function kelas()
     {

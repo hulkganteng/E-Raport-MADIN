@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Mapel extends Model
 {
     protected $table = 'mapel';
-    protected $guarded = [];
+    protected $fillable = [
+        'nama_mapel',
+        'kode_mapel',
+        'kelompok',
+        'deskripsi',
+    ];
 
     public function kelas_mapel()
     {

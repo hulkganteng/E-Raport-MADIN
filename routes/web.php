@@ -10,6 +10,8 @@ use App\Http\Controllers\NilaiController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\PublicRapotController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PengaturanController;
+use App\Http\Controllers\WilayahController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -48,6 +50,18 @@ Route::middleware(['auth'])->group(function () {
         
         Route::resource('users', UserController::class)->except(['show']);
 
+        // Pengaturan Lembaga
+        Route::get('/pengaturan', [PengaturanController::class, 'edit'])->name('pengaturan.edit');
+        Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
+
+        // Wilayah Indonesia (Cascading API)
+        Route::prefix('wilayah')->name('wilayah.')->group(function () {
+            Route::get('/provinces', [WilayahController::class, 'provinces'])->name('provinces');
+            Route::get('/cities', [WilayahController::class, 'cities'])->name('cities');
+            Route::get('/districts', [WilayahController::class, 'districts'])->name('districts');
+            Route::get('/villages', [WilayahController::class, 'villages'])->name('villages');
+        });
+
         // Kenaikan Kelas & Kelulusan
         // Kenaikan Kelas & Kelulusan (Require Active Period)
         Route::middleware(['active_period'])->group(function () {
@@ -71,6 +85,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/rekap/ranking/{kelas}', [RekapController::class, 'generateRanking'])->name('rekap.ranking');
         Route::put('/rekap/update/{rekap}', [RekapController::class, 'update'])->name('rekap.update');
     });
+    Route::get('/rekap/preview/{santri}', [RekapController::class, 'previewRapot'])->name('rekap.preview');
+    Route::get('/rekap/preview-all/{kelas}', [RekapController::class, 'previewAllRapot'])->name('rekap.preview_all');
     Route::get('/rekap/print/{santri}', [RekapController::class, 'printRapot'])->name('rekap.print');
     Route::get('/rekap/print-all/{kelas}', [RekapController::class, 'printAllRapot'])->name('rekap.print_all');
     
